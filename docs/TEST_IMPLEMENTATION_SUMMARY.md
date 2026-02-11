@@ -120,16 +120,16 @@ Successfully implemented **10 missing test types** totaling **~470 tests** acros
 pip install -r requirements-test.txt
 
 # Run standard test suite
-./run_tests.sh
+../scripts/run_tests.sh
 
 # Run all tests
-./run_tests.sh --all
+../scripts/run_tests.sh --all
 
 # Fast unit tests only
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 
 # With coverage
-./run_tests.sh --coverage
+../scripts/run_tests.sh --coverage
 
 # Mutation testing
 ./run_mutation_tests.sh
@@ -243,13 +243,13 @@ tox>=4.0.0             # Multi-version testing
 ## Next Steps (Optional)
 
 ### Immediate
-1. Run the test suite: `./run_tests.sh`
-2. Check coverage: `./run_tests.sh --coverage`
+1. Run the test suite: `../scripts/run_tests.sh`
+2. Check coverage: `../scripts/run_tests.sh --coverage`
 3. Review results in `htmlcov/index.html`
 
 ### Short Term
 1. Add QuickBooks sandbox credentials to `.env`
-2. Run integration tests: `./run_tests.sh`
+2. Run integration tests: `../scripts/run_tests.sh`
 3. Run mutation testing: `./run_mutation_tests.sh`
 
 ### Long Term
@@ -264,12 +264,12 @@ tox>=4.0.0             # Multi-version testing
 1. Identify test category
 2. Add test to appropriate file
 3. Update `TEST_SUITE_OVERVIEW.md` if needed
-4. Run `./run_tests.sh` to verify
+4. Run `../scripts/run_tests.sh` to verify
 
 ### Updating Tests
 1. Maintain backward compatibility
 2. Update golden tests when behavior changes intentionally
-3. Run full suite: `./run_tests.sh --all`
+3. Run full suite: `../scripts/run_tests.sh --all`
 4. Check mutation score: `./run_mutation_tests.sh`
 
 ## Summary

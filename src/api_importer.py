@@ -4,7 +4,7 @@ from pathlib import Path
 
 def load_apis():
     """Load QuickBooks API documentation from the local schema file."""
-    schema_path = Path(__file__).parent / 'quickbooks_openapi_schema.json'
+    schema_path = Path(__file__).parent.parent / 'data' / 'quickbooks_openapi_schema.json'
     try:
         with open(schema_path, 'r') as f:
             loaded = json.load(f)

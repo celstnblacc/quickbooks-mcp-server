@@ -9,19 +9,19 @@ This document describes the comprehensive test suite for the QuickBooks MCP Serv
 pip install -r requirements-test.txt
 
 # Fast tests only (2 minutes)
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 
 # Standard test suite (15 minutes)
-./run_tests.sh
+../scripts/run_tests.sh
 
 # All tests including chaos (25 minutes)
-./run_tests.sh --all
+../scripts/run_tests.sh --all
 
 # With coverage report
-./run_tests.sh --coverage
+../scripts/run_tests.sh --coverage
 
 # Mutation testing (30 minutes)
-./run_mutation_tests.sh
+../scripts/run_mutation_tests.sh
 ```
 
 **See [TEST_SUITE_OVERVIEW.md](TEST_SUITE_OVERVIEW.md) for comprehensive documentation.**
@@ -166,7 +166,7 @@ Fast, isolated tests with no network access. External dependencies are mocked.
 
 | Test | Description |
 |------|-------------|
-| `test_no_exec_in_source` | Parse `main_quickbooks_mcp.py` — assert zero `Exec` nodes |
+| `test_no_exec_in_source` | Parse `src/main_quickbooks_mcp.py` — assert zero `Exec` nodes |
 | `test_no_eval_in_source` | Same check for `eval()` |
 | `test_no_token_in_output` | Capture stderr during startup — no OAuth token patterns |
 | `test_schema_poisoning_safe` | Malicious `summary` field doesn't execute code |
@@ -387,7 +387,7 @@ Tests the quality of your tests by introducing bugs and checking if tests catch 
 
 ```bash
 # Run mutation testing
-./run_mutation_tests.sh
+../scripts/run_mutation_tests.sh
 
 # View results
 mutmut results
@@ -414,22 +414,22 @@ See [MUTATION_TESTING.md](MUTATION_TESTING.md) for full guide.
 pip install -r requirements-test.txt
 
 # Fast mode (~2 minutes)
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 
 # Standard mode (~15 minutes)
-./run_tests.sh
+../scripts/run_tests.sh
 
 # All tests (~25 minutes)
-./run_tests.sh --all
+../scripts/run_tests.sh --all
 
 # With coverage
-./run_tests.sh --coverage
+../scripts/run_tests.sh --coverage
 
 # Skip integration tests
-./run_tests.sh --no-integration
+../scripts/run_tests.sh --no-integration
 
 # Verbose output
-./run_tests.sh --verbose
+../scripts/run_tests.sh --verbose
 ```
 
 ### Manual pytest Commands
@@ -526,22 +526,22 @@ tests/
 
 ### Pre-Commit Hook
 ```bash
-./run_tests.sh --fast  # 2 minutes
+../scripts/run_tests.sh --fast  # 2 minutes
 ```
 
 ### Pull Request
 ```bash
-./run_tests.sh --coverage  # 15 minutes
+../scripts/run_tests.sh --coverage  # 15 minutes
 ```
 
 ### Main Branch / Nightly
 ```bash
-./run_tests.sh --all --coverage  # 25 minutes
+../scripts/run_tests.sh --all --coverage  # 25 minutes
 ```
 
 ### Weekly
 ```bash
-./run_mutation_tests.sh  # 30 minutes
+../scripts/run_mutation_tests.sh  # 30 minutes
 tox  # Multi-version testing
 ```
 

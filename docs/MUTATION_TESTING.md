@@ -22,13 +22,13 @@ pip install mutmut
 
 ```bash
 # Run mutation testing
-./run_mutation_tests.sh
+../scripts/run_mutation_tests.sh
 
 # Clean cache and run fresh
-./run_mutation_tests.sh --clean
+../scripts/run_mutation_tests.sh --clean
 
 # Show detailed results
-./run_mutation_tests.sh --results
+../scripts/run_mutation_tests.sh --results
 ```
 
 ### Manual Commands
@@ -99,7 +99,7 @@ Mutmut introduces these types of mutations:
 ### 1. Run Mutation Tests
 
 ```bash
-./run_mutation_tests.sh
+../scripts/run_mutation_tests.sh
 ```
 
 Output:
@@ -143,7 +143,7 @@ def test_rate_limiter_exact_boundary():
 ### 4. Re-run
 
 ```bash
-./run_mutation_tests.sh
+../scripts/run_mutation_tests.sh
 ```
 
 Mutation 42 should now be **Killed**!
@@ -151,11 +151,11 @@ Mutation 42 should now be **Killed**!
 ## Files Tested
 
 Mutation testing covers:
-- `main_quickbooks_mcp.py` - MCP server and tool registration
-- `quickbooks_interaction.py` - OAuth and API calls
-- `rate_limiter.py` - Token bucket rate limiter
-- `environment.py` - Environment variable handling
-- `api_importer.py` - Schema loading
+- `src/main_quickbooks_mcp.py` - MCP server and tool registration
+- `src/quickbooks_interaction.py` - OAuth and API calls
+- `src/rate_limiter.py` - Token bucket rate limiter
+- `src/environment.py` - Environment variable handling
+- `src/api_importer.py` - Schema loading
 
 ## Performance
 
@@ -194,7 +194,7 @@ jobs:
           pip install -r requirements.txt
           pip install mutmut pytest
       - name: Run mutation tests
-        run: ./run_mutation_tests.sh
+        run: ../scripts/run_mutation_tests.sh
       - name: Check mutation score
         run: |
           SCORE=$(mutmut results | grep -oP '\d+\.\d+%' | head -1)
@@ -222,7 +222,7 @@ mutmut run --runner="pytest -x -q --timeout=60"
 ```bash
 # Clear cache
 rm -rf .mutmut-cache
-./run_mutation_tests.sh
+../scripts/run_mutation_tests.sh
 ```
 
 ## Best Practices

@@ -9,6 +9,9 @@ import logging
 import sys
 from pathlib import Path
 
+# Add src directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent))
+
 from mcp import types
 from mcp.server.fastmcp import FastMCP
 
@@ -58,7 +61,7 @@ def get_quickbooks_entity_schema(entity_name: str) -> types.TextContent:
     Use this tool to understand the available fields for an entity before
     constructing a query with the `query_quickbooks` tool.
     """
-    schema_path = Path(__file__).parent / "quickbooks_entity_schemas.json"
+    schema_path = Path(__file__).parent.parent / "data" / "quickbooks_entity_schemas.json"
     try:
         with open(schema_path, "r") as f:
             all_schemas = json.load(f)

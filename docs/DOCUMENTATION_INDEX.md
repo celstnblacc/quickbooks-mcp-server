@@ -5,16 +5,15 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 ## 🚀 Quick Start
 
 **New to the project?** Start here:
-1. [README.md](README.md) - Project overview, installation, usage
+1. [README.md](../README.md) - Project overview, installation, usage
 2. [TESTING.md](TESTING.md) - How to run tests
 3. [CLAUDE.md](CLAUDE.md) - Development guide for Claude Code
 
 ## 📚 Main Documentation
 
 ### Project Documentation
-- **[README.md](README.md)** - Project overview, setup instructions, security hardening details
+- **[README.md](../README.md)** - Project overview, setup instructions, security hardening details
 - **[CLAUDE.md](CLAUDE.md)** - Developer guide for working with this codebase in Claude Code
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history and recent changes
 
 ### Testing Documentation
 - **[TESTING.md](TESTING.md)** - Complete test suite documentation (~470 tests across 19 files)
@@ -24,24 +23,24 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 - **[MUTATION_TESTING.md](MUTATION_TESTING.md)** - Guide to mutation testing (meta-testing)
 
 ### Configuration Files
-- **[pyproject.toml](pyproject.toml)** - Python project configuration
-- **[requirements-test.txt](requirements-test.txt)** - Test dependencies
-- **[tox.ini](tox.ini)** - Multi-version Python testing configuration
-- **[env_template.txt](env_template.txt)** - Template for `.env` file
+- **[pyproject.toml](../pyproject.toml)** - Python project configuration
+- **[requirements-test.txt](../requirements-test.txt)** - Test dependencies
+- **[tox.ini](../tox.ini)** - Multi-version Python testing configuration
+- **[config/env_template.txt](../config/env_template.txt)** - Template for `.env` file
 
 ## 🎯 By Use Case
 
 ### I want to...
 
 #### Set Up the Project
-1. Read [README.md](README.md) - Requirements & Step 1-3
-2. Copy `env_template.txt` to `.env` and configure
-3. Run `uv run main_quickbooks_mcp.py`
+1. Read [README.md](../README.md) - Requirements & Step 1-3
+2. Copy `config/env_template.txt` to `.env` and configure
+3. Run `uv run src/main_quickbooks_mcp.py`
 
 #### Run Tests
 1. Quick start: [TESTING.md](TESTING.md) - Quick Reference section
 2. Detailed guide: [TEST_SUITE_OVERVIEW.md](TEST_SUITE_OVERVIEW.md)
-3. Run: `./run_tests.sh`
+3. Run: `../scripts/run_tests.sh`
 
 #### Understand the Test Suite
 1. [TEST_SUITE_OVERVIEW.md](TEST_SUITE_OVERVIEW.md) - All test categories
@@ -50,15 +49,14 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 
 #### Run Mutation Testing
 1. [MUTATION_TESTING.md](MUTATION_TESTING.md) - Complete guide
-2. Run: `./run_mutation_tests.sh`
+2. Run: `../scripts/run_mutation_tests.sh`
 
 #### Contribute Code
 1. [CLAUDE.md](CLAUDE.md) - Development workflow
 2. [TESTING.md](TESTING.md) - How to add tests
-3. [CHANGELOG.md](CHANGELOG.md) - Document your changes
 
 #### Set Up CI/CD
-1. [.github/workflows/tests.yml](.github/workflows/tests.yml) - GitHub Actions workflow
+1. [.github/workflows/tests.yml](../.github/workflows/tests.yml) - GitHub Actions workflow
 2. [TEST_SUITE_OVERVIEW.md](TEST_SUITE_OVERVIEW.md) - CI/CD Recommendations section
 
 ## 📊 Test Documentation Breakdown
@@ -99,8 +97,8 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 ## 🔍 Finding Specific Information
 
 ### Security
-- **Security hardening**: [README.md](README.md) - "Security Hardening (Feb 2026)" section
-- **F-01 through F-10 fixes**: [README.md](README.md) - Vulnerability table
+- **Security hardening**: [README.md](../README.md) - "Security Hardening (Feb 2026)" section
+- **F-01 through F-10 fixes**: [README.md](../README.md) - Vulnerability table
 - **Security tests**: [TESTING.md](TESTING.md) - Section 3
 
 ### Architecture
@@ -114,14 +112,14 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 - **Quick reference**: [TEST_SUITE_OVERVIEW.md](TEST_SUITE_OVERVIEW.md) - Top of file
 
 ### Configuration
-- **Environment variables**: [README.md](README.md) - Step 2
-- **Claude Desktop setup**: [README.md](README.md) - Step 3
-- **Test configuration**: [tox.ini](tox.ini), [requirements-test.txt](requirements-test.txt)
+- **Environment variables**: [README.md](../README.md) - Step 2
+- **Claude Desktop setup**: [README.md](../README.md) - Step 3
+- **Test configuration**: [tox.ini](../tox.ini), [requirements-test.txt](../requirements-test.txt)
 
 ## 📖 Documentation Files
 
 ### Primary (Read First)
-1. [README.md](README.md) - 122 lines
+1. [README.md](../README.md) - 122 lines
 2. [CLAUDE.md](CLAUDE.md) - Comprehensive developer guide
 3. [TESTING.md](TESTING.md) - 800+ lines of test documentation
 
@@ -132,27 +130,26 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 
 ### Reference
 7. [TEST_IMPLEMENTATION_SUMMARY.md](TEST_IMPLEMENTATION_SUMMARY.md) - Implementation details
-8. [CHANGELOG.md](CHANGELOG.md) - Version history
-9. [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) - This file
+8. [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) - This file
 
 ### Configuration
-10. [pyproject.toml](pyproject.toml) - Project metadata
-11. [requirements-test.txt](requirements-test.txt) - Test dependencies
-12. [tox.ini](tox.ini) - Multi-version testing
-13. [env_template.txt](env_template.txt) - Environment template
+9. [pyproject.toml](../pyproject.toml) - Project metadata
+10. [requirements-test.txt](../requirements-test.txt) - Test dependencies
+11. [tox.ini](../tox.ini) - Multi-version testing
+12. [config/env_template.txt](../config/env_template.txt) - Environment template
 
 ### CI/CD
-14. [.github/workflows/tests.yml](.github/workflows/tests.yml) - GitHub Actions
+13. [.github/workflows/tests.yml](../.github/workflows/tests.yml) - GitHub Actions
 
 ## 🆘 Getting Help
 
 ### Common Questions
 
 **Q: How do I run tests quickly?**
-A: `./run_tests.sh --fast` (2 minutes)
+A: `../scripts/run_tests.sh --fast` (2 minutes)
 
 **Q: How do I see test coverage?**
-A: `./run_tests.sh --coverage` → open `htmlcov/index.html`
+A: `../scripts/run_tests.sh --coverage` → open `htmlcov/index.html`
 
 **Q: What tests require QuickBooks credentials?**
 A: Contract, E2E, and Integration tests (auto-skipped without `.env`)
@@ -167,15 +164,16 @@ A: See [MUTATION_TESTING.md](MUTATION_TESTING.md) - tests the quality of your te
 A: [CLAUDE.md](CLAUDE.md) - "Architecture" section
 
 **Q: How were the vulnerabilities fixed?**
-A: [README.md](README.md) - "Security Hardening" section with F-01 through F-10 table
+A: [README.md](../README.md) - "Security Hardening" section with F-01 through F-10 table
 
 ## 📈 Documentation Statistics
 
-- **Total Documentation Files**: 14
+- **Total Documentation Files**: 9 (+ README.md in root)
 - **Total Lines**: 5,000+
 - **Test Files Documented**: 19
 - **Test Categories**: 15
 - **Code Examples**: 100+
+- **Location**: All documentation in `docs/` folder except README.md
 
 ## 🎉 Documentation Highlights
 
@@ -188,10 +186,11 @@ A: [README.md](README.md) - "Security Hardening" section with F-01 through F-10 
 ## 📝 Contributing to Documentation
 
 When updating documentation:
-1. Update the relevant primary file (README, CLAUDE, TESTING)
-2. Update [CHANGELOG.md](CHANGELOG.md)
-3. Update cross-references if needed
-4. Run tests to verify examples work: `./run_tests.sh`
+1. Update the relevant file in `docs/` (or README.md in root)
+2. Update cross-references if needed
+3. Run tests to verify examples work: `../scripts/run_tests.sh`
+
+All documentation (except README.md) is in the `docs/` folder.
 
 ---
 

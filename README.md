@@ -20,7 +20,7 @@ For local development, create a `.env` file in the project root with your QuickB
 
 ```bash
 # Copy the template and fill in your actual credentials
-cp env_template.txt .env
+cp config/env_template.txt .env
 ```
 
 Then edit the `.env` file with your actual QuickBooks API credentials:
@@ -51,7 +51,7 @@ QUICKBOOKS_ENV='sandbox' or 'production'
         "--directory",
         "<absolute_path_to_quickbooks_mcp_folder>",
         "run",
-        "main_quickbooks_mcp.py"
+        "src/main_quickbooks_mcp.py"
       ]
     }
   }
@@ -92,17 +92,17 @@ The server consists of four core modules:
 
 | File | Purpose |
 |------|---------|
-| `main_quickbooks_mcp.py` | MCP entry point — registers static tools (`query_quickbooks`, `get_quickbooks_entity_schema`) and dynamically registers tools for every QuickBooks API endpoint using a closure factory |
-| `quickbooks_interaction.py` | `QuickBooksSession` class — OAuth 2.0 refresh-token flow, HTTP dispatch with method allowlisting, automatic 401 retry, token persistence |
-| `environment.py` | `Environment` class — loads `.env` via `python-dotenv`, checks file permissions on startup |
-| `rate_limiter.py` | `RateLimiter` class — token-bucket rate limiter (default: 60 req/min) |
+| `src/main_quickbooks_mcp.py` | MCP entry point — registers static tools (`query_quickbooks`, `get_quickbooks_entity_schema`) and dynamically registers tools for every QuickBooks API endpoint using a closure factory |
+| `src/quickbooks_interaction.py` | `QuickBooksSession` class — OAuth 2.0 refresh-token flow, HTTP dispatch with method allowlisting, automatic 401 retry, token persistence |
+| `src/environment.py` | `Environment` class — loads `.env` via `python-dotenv`, checks file permissions on startup |
+| `src/rate_limiter.py` | `RateLimiter` class — token-bucket rate limiter (default: 60 req/min) |
 
 Supporting files:
 
 | File | Purpose |
 |------|---------|
-| `api_importer.py` | Loads and parses the OpenAPI schema JSON to produce API config dicts |
-| `quickbooks_entity_schemas.json` | Entity field schemas used by `get_quickbooks_entity_schema` |
+| `src/api_importer.py` | Loads and parses the OpenAPI schema JSON to produce API config dicts |
+| `data/quickbooks_entity_schemas.json` | Entity field schemas used by `get_quickbooks_entity_schema` |
 
 ### How tool registration works
 
@@ -173,4 +173,10 @@ python -m pytest tests/ -v
 | F-07 (error sanitization) | `test_error_sanitization.py`, `test_security_regression.py` | 7 |
 | F-08 (rate limiting) | `test_rate_limiter.py`, `test_edge_cases.py` | 9 |
 
-See [TESTING.md](TESTING.md) for the full test catalogue with individual test descriptions, fixtures, and testing patterns.
+See [TESTING.md](docs/TESTING.md) for the full test catalogue with individual test descriptions, fixtures, and testing patterns.
+
+## Documentation
+
+- [TESTING.md](docs/TESTING.md) - Complete test suite documentation (~470 tests)
+- [CLAUDE.md](docs/CLAUDE.md) - Development guide for Claude Code
+- [DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md) - Complete documentation index

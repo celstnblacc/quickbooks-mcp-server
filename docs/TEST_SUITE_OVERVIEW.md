@@ -7,16 +7,16 @@
 pip install -r requirements-test.txt
 
 # Run all core tests (fast, ~2-5 minutes)
-./run_tests.sh
+../scripts/run_tests.sh
 
 # Run all tests including extended (10-15 minutes)
-./run_tests.sh --all
+../scripts/run_tests.sh --all
 
 # Run only fast unit tests (30 seconds)
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 
 # Run with coverage
-./run_tests.sh --coverage
+../scripts/run_tests.sh --coverage
 
 # Run mutation testing (20-30 minutes)
 ./run_mutation_tests.sh
@@ -135,7 +135,7 @@ pip install -r requirements-test.txt
 Run only fast unit tests for quick feedback during development.
 
 ```bash
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 ```
 
 **Runs**: Unit, Edge Case, Security Regression
@@ -146,7 +146,7 @@ Run only fast unit tests for quick feedback during development.
 Run core and extended tests (except slow chaos/mutation).
 
 ```bash
-./run_tests.sh
+../scripts/run_tests.sh
 ```
 
 **Runs**: All except Chaos, Mutation
@@ -157,7 +157,7 @@ Run core and extended tests (except slow chaos/mutation).
 Run everything including chaos tests.
 
 ```bash
-./run_tests.sh --all
+../scripts/run_tests.sh --all
 ```
 
 **Runs**: Everything except Mutation
@@ -168,7 +168,7 @@ Run everything including chaos tests.
 Standard run with code coverage report.
 
 ```bash
-./run_tests.sh --coverage
+../scripts/run_tests.sh --coverage
 ```
 
 **Output**: HTML report in `htmlcov/index.html`
@@ -199,19 +199,19 @@ Standard run with code coverage report.
 
 ### Pre-Commit Hook
 ```bash
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 ```
 Time: ~2 minutes
 
 ### Pull Request
 ```bash
-./run_tests.sh --coverage
+../scripts/run_tests.sh --coverage
 ```
 Time: ~15 minutes
 
 ### Main Branch / Nightly
 ```bash
-./run_tests.sh --all --coverage
+../scripts/run_tests.sh --all --coverage
 ```
 Time: ~25 minutes
 
@@ -260,7 +260,7 @@ pip install -r requirements-test.txt
 - E2E tests
 - Some functional regression tests
 
-**Setup**: Create `.env` file with sandbox credentials (see `env_template.txt`)
+**Setup**: Create `.env` file with sandbox credentials (see `config/env_template.txt`)
 
 ## Common Issues
 
@@ -270,7 +270,7 @@ pip install -r requirements-test.txt
 pip install hypothesis
 
 # Or skip property-based tests
-./run_tests.sh --fast
+../scripts/run_tests.sh --fast
 ```
 
 ### Integration tests skipped
@@ -282,7 +282,7 @@ ls -la .env
 cat .env | grep QUICKBOOKS_CLIENT_ID
 
 # If missing, copy template
-cp env_template.txt .env
+cp config/env_template.txt .env
 # Then edit .env with real credentials
 ```
 
