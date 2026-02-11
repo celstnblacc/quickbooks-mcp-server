@@ -277,7 +277,7 @@ class TestUnicodeAndSpecialCharacters:
             # Should handle safely
             assert result.text is not None
 
-    @given(st.text(min_size=0, max_size=50))
+    @given(st.text(min_size=0, max_size=50).filter(lambda x: '\x00' not in x))
     @settings(deadline=None, max_examples=50)
     def test_environment_var_fuzzing(self, random_value):
         """Environment variables with random values are handled."""

@@ -34,6 +34,11 @@ class TestRateLimiterStress:
 
         limiter = RateLimiter(requests_per_minute=120)  # 2 req/sec
 
+        # First exhaust the initial burst capacity
+        for _ in range(120):
+            limiter.is_allowed()
+
+        # Now test sustained rate over 5 seconds
         start = time.time()
         allowed = []
         denied = []
@@ -120,9 +125,9 @@ class TestQueryValidationStress:
         """Test with a 100KB SELECT query."""
         from main_quickbooks_mcp import query_quickbooks
 
-        # 100KB query
+        # 100KB query - need ~8000 conditions to exceed 100KB
         long_query = "SELECT * FROM Account WHERE " + " OR ".join(
-            f"Id='{i}'" for i in range(5000)
+            f"Id='{i}'" for i in range(8000)
         )
         assert len(long_query) > 100_000
 
