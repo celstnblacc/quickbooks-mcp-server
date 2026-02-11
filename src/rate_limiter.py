@@ -22,7 +22,10 @@ class RateLimiter:
     def _refill(self):
         now = time.monotonic()
         elapsed = now - self.last_refill
-        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+        # Handle negative elapsed time (clock jumped backward)
+        if elapsed >= 0:
+            self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+        # Always update last_refill to current time
         self.last_refill = now
 
     def is_allowed(self) -> bool:
