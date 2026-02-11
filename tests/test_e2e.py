@@ -376,26 +376,27 @@ class TestConcurrentUserRequests:
         mock_resp = MagicMock()
         mock_resp.status_code = 401
 
-        results = []
-        lock = threading.Lock()
+        # Set up module once before threads start
+        with patch("requests.post", return_value=mock_resp):
+            for mod in list(sys.modules):
+                if "main_quickbooks_mcp" in mod:
+                    del sys.modules[mod]
 
-        def worker():
-            with patch("requests.post", return_value=mock_resp):
-                for mod in list(sys.modules):
-                    if "main_quickbooks_mcp" in mod:
-                        del sys.modules[mod]
+            from main_quickbooks_mcp import query_quickbooks
 
-                from main_quickbooks_mcp import query_quickbooks
+            results = []
+            lock = threading.Lock()
 
+            def worker():
                 result = query_quickbooks("SELECT * FROM Account")
                 with lock:
                     results.append(result.text)
 
-        threads = [threading.Thread(target=worker) for _ in range(3)]
-        for t in threads:
-            t.start()
-        for t in threads:
-            t.join()
+            threads = [threading.Thread(target=worker) for _ in range(3)]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
 
         # All requests should complete
         assert len(results) == 3

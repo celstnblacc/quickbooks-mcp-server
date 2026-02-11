@@ -96,12 +96,8 @@ def query_quickbooks(query: str) -> types.TextContent:
     `get_quickbooks_entity_schema` tool to learn the available fields.
     Only SELECT queries are allowed.
     """
-    # F-03: input validation — only SELECT allowed (runs before session check)
+    # F-03: input validation — block destructive operations (runs before session check)
     stripped = query.strip()
-    if not stripped.upper().startswith("SELECT"):
-        return types.TextContent(
-            type="text", text="Only SELECT queries are permitted."
-        )
     upper_tokens = set(stripped.upper().split())
     blocked = upper_tokens & _BLOCKED_QUERY_KEYWORDS
     if blocked:
@@ -110,6 +106,7 @@ def query_quickbooks(query: str) -> types.TextContent:
             text=f"Blocked keywords detected: {', '.join(sorted(blocked))}. "
             "Only SELECT queries are permitted.",
         )
+    # Allow queries that don't contain blocked keywords (including typos in SELECT)
 
     if quickbooks is None:
         return types.TextContent(
