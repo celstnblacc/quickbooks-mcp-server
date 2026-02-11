@@ -320,7 +320,14 @@ def register_all_apis():
     logger.info("Registered %d API tools from OpenAPI schema", len(apis))
 
 
-register_all_apis()
+try:
+    register_all_apis()
+except Exception as exc:
+    logger.warning(
+        "Failed to register API tools from schema: %s. "
+        "Static tools (query, schema) will still work.",
+        exc
+    )
 
 if __name__ == "__main__":
     logger.info("Starting QuickBooks MCP server")
