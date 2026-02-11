@@ -57,7 +57,11 @@ class TestEnvPersistenceEdgeCases:
 
         session.refresh_token = "new_tok"
 
-        with patch.object(Path, "__truediv__", return_value=env_file):
+        # Patch Path in quickbooks_interaction module to return mock that points to test env
+        with patch("quickbooks_interaction.Path") as mock_path_class:
+            mock_instance = MagicMock()
+            mock_instance.parent = tmp_path
+            mock_path_class.return_value = mock_instance
             session._persist_refresh_token()
 
         content = env_file.read_text()

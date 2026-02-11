@@ -39,7 +39,11 @@ class TestDiskFailures:
 
         # Simulate disk full (OSError on write)
         with patch("pathlib.Path.write_text", side_effect=OSError("No space left on device")):
-            with patch.object(Path, "__truediv__", return_value=env_file):
+            # Patch Path in quickbooks_interaction module to return mock that points to test env
+            with patch("quickbooks_interaction.Path") as mock_path_class:
+                mock_instance = MagicMock()
+                mock_instance.parent = tmp_path
+                mock_path_class.return_value = mock_instance
                 # Should log warning but not crash
                 session._persist_refresh_token()
 
@@ -211,7 +215,11 @@ class TestFileSystemChaos:
         # Delete env file
         env_file.unlink()
 
-        with patch.object(Path, "__truediv__", return_value=env_file):
+        # Patch Path in quickbooks_interaction module to return mock that points to test env
+        with patch("quickbooks_interaction.Path") as mock_path_class:
+            mock_instance = MagicMock()
+            mock_instance.parent = tmp_path
+            mock_path_class.return_value = mock_instance
             # Should handle gracefully (log error, continue)
             session._persist_refresh_token()
 
@@ -338,7 +346,11 @@ class TestConcurrencyRaceConditions:
 
         def write_worker(thread_id):
             session.refresh_token = f"token_{thread_id}"
-            with patch.object(Path, "__truediv__", return_value=env_file):
+            # Patch Path in quickbooks_interaction module to return mock that points to test env
+            with patch("quickbooks_interaction.Path") as mock_path_class:
+                mock_instance = MagicMock()
+                mock_instance.parent = tmp_path
+                mock_path_class.return_value = mock_instance
                 session._persist_refresh_token()
 
         threads = [threading.Thread(target=write_worker, args=(i,)) for i in range(10)]
