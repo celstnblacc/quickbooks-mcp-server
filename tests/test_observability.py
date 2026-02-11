@@ -175,6 +175,7 @@ class TestLogLevels:
         """Debug information is at DEBUG level."""
         with caplog.at_level(logging.DEBUG):
             logger = logging.getLogger("test")
+            logger.setLevel(logging.DEBUG)
             logger.debug("Debug information")
 
         debug_logs = [r for r in caplog.records if r.levelname == "DEBUG"]

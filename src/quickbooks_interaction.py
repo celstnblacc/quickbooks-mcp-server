@@ -113,7 +113,7 @@ class QuickBooksSession:
             if new_refresh != self.refresh_token:
                 self.refresh_token = new_refresh
                 self._persist_refresh_token()  # F-06
-            logger.info("Successfully refreshed QuickBooks access token")
+            logger.info("QuickBooks session initialized - access token refreshed successfully")
         else:
             # F-07: log details internally, raise a generic message
             logger.error(
