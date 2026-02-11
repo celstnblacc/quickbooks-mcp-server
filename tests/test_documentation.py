@@ -36,7 +36,7 @@ class TestREADMEExamples:
         env_vars_readme = re.findall(r'QUICKBOOKS_\w+', readme_content)
 
         # Read template
-        template_path = PROJECT_ROOT / "env_template.txt"
+        template_path = PROJECT_ROOT / "config" / "env_template.txt"
         if template_path.exists():
             template_content = template_path.read_text()
             env_vars_template = re.findall(r'QUICKBOOKS_\w+', template_content)
@@ -103,12 +103,12 @@ class TestEnvironmentTemplateValid:
 
     def test_env_template_exists(self):
         """env_template.txt exists."""
-        template_path = PROJECT_ROOT / "env_template.txt"
+        template_path = PROJECT_ROOT / "config" / "env_template.txt"
         assert template_path.exists()
 
     def test_env_template_format(self):
         """env_template.txt has correct format."""
-        template_path = PROJECT_ROOT / "env_template.txt"
+        template_path = PROJECT_ROOT / "config" / "env_template.txt"
         content = template_path.read_text()
 
         # Should have key variables
@@ -120,7 +120,7 @@ class TestEnvironmentTemplateValid:
 
     def test_env_template_values_are_placeholders(self):
         """env_template.txt uses placeholders, not real values."""
-        template_path = PROJECT_ROOT / "env_template.txt"
+        template_path = PROJECT_ROOT / "config" / "env_template.txt"
         content = template_path.read_text()
 
         # Should not contain real-looking tokens

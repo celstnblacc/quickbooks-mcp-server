@@ -15,7 +15,7 @@ class TestNoExecInSource:
     """F-01 regression: exec() must never appear as a call in the source."""
 
     def test_no_exec_calls_in_main(self):
-        source_path = PROJECT_ROOT / "main_quickbooks_mcp.py"
+        source_path = PROJECT_ROOT / "src" / "main_quickbooks_mcp.py"
         source = source_path.read_text()
         tree = ast.parse(source)
 
@@ -29,7 +29,7 @@ class TestNoExecInSource:
         assert exec_calls == [], f"exec() found at lines: {exec_calls}"
 
     def test_no_eval_calls_in_main(self):
-        source_path = PROJECT_ROOT / "main_quickbooks_mcp.py"
+        source_path = PROJECT_ROOT / "src" / "main_quickbooks_mcp.py"
         source = source_path.read_text()
         tree = ast.parse(source)
 
@@ -45,7 +45,7 @@ class TestNoExecInSource:
     def test_no_exec_in_any_py_file(self):
         """No .py file in the project should use exec() or eval()."""
         dangerous = []
-        for py_file in PROJECT_ROOT.glob("*.py"):
+        for py_file in (PROJECT_ROOT / "src").glob("*.py"):
             if py_file.name.startswith("test_"):
                 continue
             source = py_file.read_text()
@@ -63,7 +63,7 @@ class TestNoTokenInOutput:
     """F-04 regression: access token must never be printed."""
 
     def test_no_token_print_in_interaction(self):
-        source_path = PROJECT_ROOT / "quickbooks_interaction.py"
+        source_path = PROJECT_ROOT / "src" / "quickbooks_interaction.py"
         source = source_path.read_text()
         # Should not contain print statements that include access_token
         assert 'print("Access token:' not in source
@@ -71,7 +71,7 @@ class TestNoTokenInOutput:
         assert "print(f" not in source or "access_token" not in source.split("print(f")[-1].split(")")[0] if "print(f" in source else True
 
     def test_no_main_block_with_token(self):
-        source_path = PROJECT_ROOT / "quickbooks_interaction.py"
+        source_path = PROJECT_ROOT / "src" / "quickbooks_interaction.py"
         source = source_path.read_text()
         # The __main__ block should not reference access_token
         if '__name__' in source and '__main__' in source:

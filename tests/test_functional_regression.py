@@ -260,7 +260,7 @@ class TestAPISchemaStability:
 
     def test_openapi_schema_structure_stable(self):
         """OpenAPI schema has expected structure."""
-        schema_path = PROJECT_ROOT / "quickbooks_openapi_schema.json"
+        schema_path = PROJECT_ROOT / "data" / "quickbooks_openapi_schema.json"
         with open(schema_path) as f:
             schema = json.load(f)
 

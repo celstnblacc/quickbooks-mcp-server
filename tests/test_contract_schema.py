@@ -26,7 +26,7 @@ class TestSchemaValidation:
     @pytest.fixture(autouse=True)
     def _setup(self):
         """Load schema and set up session."""
-        schema_path = PROJECT_ROOT / "quickbooks_openapi_schema.json"
+        schema_path = PROJECT_ROOT / "data" / "quickbooks_openapi_schema.json"
         with open(schema_path) as f:
             self.schema = json.load(f)
 
@@ -118,7 +118,7 @@ class TestSchemaResponseStructure:
 
     def test_openapi_schema_structure(self):
         """OpenAPI schema has expected top-level structure."""
-        schema_path = PROJECT_ROOT / "quickbooks_openapi_schema.json"
+        schema_path = PROJECT_ROOT / "data" / "quickbooks_openapi_schema.json"
         with open(schema_path) as f:
             schema = json.load(f)
 
@@ -246,7 +246,7 @@ class TestSchemaVersioning:
 
     def test_schema_has_version_info(self):
         """OpenAPI schema includes version information."""
-        schema_path = PROJECT_ROOT / "quickbooks_openapi_schema.json"
+        schema_path = PROJECT_ROOT / "data" / "quickbooks_openapi_schema.json"
         with open(schema_path) as f:
             schema = json.load(f)
 
@@ -255,7 +255,7 @@ class TestSchemaVersioning:
 
     def test_minorversion_support(self):
         """Schema supports QuickBooks API minorversion parameter."""
-        schema_path = PROJECT_ROOT / "quickbooks_openapi_schema.json"
+        schema_path = PROJECT_ROOT / "data" / "quickbooks_openapi_schema.json"
         with open(schema_path) as f:
             schema = json.load(f)
 
