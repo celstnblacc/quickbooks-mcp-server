@@ -314,12 +314,12 @@ class TestCLAUDEmd:
 
     def test_claude_md_exists(self):
         """CLAUDE.md exists."""
-        claude_md_path = PROJECT_ROOT / "CLAUDE.md"
+        claude_md_path = PROJECT_ROOT / "docs" / "CLAUDE.md"
         assert claude_md_path.exists()
 
     def test_claude_md_has_commands(self):
         """CLAUDE.md documents key commands."""
-        claude_md_path = PROJECT_ROOT / "CLAUDE.md"
+        claude_md_path = PROJECT_ROOT / "docs" / "CLAUDE.md"
         content = claude_md_path.read_text().lower()
 
         # Should document key development commands
@@ -328,7 +328,7 @@ class TestCLAUDEmd:
 
     def test_claude_md_describes_architecture(self):
         """CLAUDE.md describes architecture."""
-        claude_md_path = PROJECT_ROOT / "CLAUDE.md"
+        claude_md_path = PROJECT_ROOT / "docs" / "CLAUDE.md"
         content = claude_md_path.read_text().lower()
 
         # Should describe key components
