@@ -1,0 +1,59 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ master, main, feature/comprehensive-test-suite ]
+  pull_request:
+    branches: [ master, main ]
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
+
+jobs:
+  fast-tests:
+    name: Fast Tests (2 min)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: pip install -r requirements-test.txt
+    - name: Run fast tests
+      run: ./run_tests.sh --fast
+
+  standard-tests:
+    name: Standard Test Suite (15 min)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: pip install -r requirements-test.txt
+    - name: Run standard test suite with coverage
+      run: ./run_tests.sh --coverage --no-integration
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+
+  multi-version:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: pip install -r requirements-test.txt
+    - name: Run compatibility tests
+      run: pytest tests/test_compatibility.py -v

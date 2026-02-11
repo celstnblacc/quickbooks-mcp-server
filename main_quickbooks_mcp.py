@@ -1,176 +1,324 @@
-from mcp import types
-from mcp.server.fastmcp import FastMCP
-from quickbooks_interaction import QuickBooksSession
-from api_importer import load_apis
-import sys
+"""QuickBooks MCP Server — secure entry point.
+
+Registers MCP tools for every QuickBooks API endpoint defined in the
+local OpenAPI schema, using a closure factory instead of exec().
+"""
+
 import json
+import logging
+import sys
 from pathlib import Path
 
-# Initialize QuickBooks session with error handling
+from mcp import types
+from mcp.server.fastmcp import FastMCP
+
+from api_importer import load_apis
+from quickbooks_interaction import QuickBooksSession
+from rate_limiter import RateLimiter
+
+# ---------------------------------------------------------------------------
+# Logging (F-10)
+# ---------------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(name)s  %(levelname)s  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    stream=sys.stderr,
+)
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Global instances
+# ---------------------------------------------------------------------------
 quickbooks = None
 try:
     quickbooks = QuickBooksSession()
-    print("✓ QuickBooks session initialized successfully", file=sys.stderr)
-except Exception as e:
-    print(f"✗ Failed to initialize QuickBooks session: {e}", file=sys.stderr)
-    print("Please check your .env file and QuickBooks credentials", file=sys.stderr)
+    logger.info("QuickBooks session initialised successfully")
+except Exception as exc:
+    logger.error("Failed to initialise QuickBooks session: %s", exc)
+    logger.error("Please check your .env file and QuickBooks credentials")
 
 mcp = FastMCP("quickbooks")
+rate_limiter = RateLimiter(requests_per_minute=60)
+
+# ---------------------------------------------------------------------------
+# Dangerous-keyword list for query validation (F-03)
+# ---------------------------------------------------------------------------
+_BLOCKED_QUERY_KEYWORDS = {"DELETE", "UPDATE", "INSERT", "DROP", "ALTER", "CREATE"}
+
+# ---------------------------------------------------------------------------
+# Static tools
+# ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def get_quickbooks_entity_schema(entity_name: str) -> types.TextContent:
     """
     Fetches the schema for a given QuickBooks entity (e.g., 'Bill', 'Customer').
-    Use this tool to understand the available fields for an entity before constructing a query with the `query_quickbooks` tool.
+    Use this tool to understand the available fields for an entity before
+    constructing a query with the `query_quickbooks` tool.
     """
-    schema_path = Path(__file__).parent / 'quickbooks_entity_schemas.json'
+    schema_path = Path(__file__).parent / "quickbooks_entity_schemas.json"
     try:
-        with open(schema_path, 'r') as f:
+        with open(schema_path, "r") as f:
             all_schemas = json.load(f)
-        
+
         entity_schema = all_schemas.get(entity_name)
-        
         if entity_schema:
-            return types.TextContent(type='text', text=json.dumps(entity_schema, indent=2))
-        else:
-            available_entities = list(all_schemas.keys())
-            return types.TextContent(type='text', text=f"Error: Schema not found for entity '{entity_name}'. Available entities: {available_entities}")
+            return types.TextContent(
+                type="text", text=json.dumps(entity_schema, indent=2)
+            )
+        available = list(all_schemas.keys())
+        return types.TextContent(
+            type="text",
+            text=f"Entity '{entity_name}' not found. Available: {available}",
+        )
     except FileNotFoundError:
-        return types.TextContent(type='text', text="Error: The schema definition file `quickbooks_entity_schemas.json` was not found.")
-    except Exception as e:
-        return types.TextContent(type='text', text=f"An error occurred: {e}")
+        return types.TextContent(
+            type="text",
+            text="Schema file quickbooks_entity_schemas.json not found.",
+        )
+    except Exception:
+        logger.exception("Error reading entity schema")
+        return types.TextContent(
+            type="text", text="An error occurred while reading the schema."
+        )
+
 
 @mcp.tool()
 def query_quickbooks(query: str) -> types.TextContent:
     """
-    Executes a SQL-like query on a QuickBooks entity.
-    **IMPORTANT**: Before using this tool, you MUST first use the `get_quickbooks_entity_schema` tool to get the schema for the entity you want to query (e.g., 'Bill', 'Customer'). This will show you the available fields to use in your query's `select` and `where` clauses.
+    Executes a SQL-like SELECT query on a QuickBooks entity.
+    **IMPORTANT**: Before using this tool, first use the
+    `get_quickbooks_entity_schema` tool to learn the available fields.
+    Only SELECT queries are allowed.
     """
+    # F-03: input validation — only SELECT allowed (runs before session check)
+    stripped = query.strip()
+    if not stripped.upper().startswith("SELECT"):
+        return types.TextContent(
+            type="text", text="Only SELECT queries are permitted."
+        )
+    upper_tokens = set(stripped.upper().split())
+    blocked = upper_tokens & _BLOCKED_QUERY_KEYWORDS
+    if blocked:
+        return types.TextContent(
+            type="text",
+            text=f"Blocked keywords detected: {', '.join(sorted(blocked))}. "
+            "Only SELECT queries are permitted.",
+        )
+
     if quickbooks is None:
-        return types.TextContent(type='text', text="Error: QuickBooks session not initialized. Please check your credentials and restart the server.")
-    
+        return types.TextContent(
+            type="text",
+            text="Error: QuickBooks session not initialised. "
+            "Check your credentials and restart the server.",
+        )
+
+    # F-08: rate limit
+    if not rate_limiter.is_allowed():
+        return types.TextContent(
+            type="text",
+            text="Rate limit exceeded. Please wait before retrying.",
+        )
+
     try:
-        response = quickbooks.query(query)
-        return types.TextContent(type='text', text=str(response))
-    except Exception as e:
-        return types.TextContent(type='text', text=f"Error executing query: {e}")
+        response = quickbooks.query(stripped)
+        return types.TextContent(type="text", text=str(response))
+    except Exception:
+        logger.exception("Error executing QuickBooks query")
+        return types.TextContent(
+            type="text", text="An error occurred while executing the query."
+        )
+
+
+# ---------------------------------------------------------------------------
+# Dynamic tool registration — closure factory (F-01)
+# ---------------------------------------------------------------------------
+
+def _make_api_tool(api_config, qb_session_ref, limiter):
+    """Return a tool handler that captures *api_config* via closure.
+
+    This replaces the previous exec()-based approach, eliminating any risk
+    of code injection through the OpenAPI schema file.
+    """
+    route = api_config["route"]
+    api_method = api_config["method"]
+    params_info = [p for p in api_config.get("parameters", []) if p["name"] != "realmId"]
+    tool_doc = api_config["docstring"]
+    tool_name = api_config["tool_name"]
+
+    def handler(**kwargs) -> types.TextContent:
+        # Session check
+        session = qb_session_ref()
+        if session is None:
+            return types.TextContent(
+                type="text",
+                text="Error: QuickBooks session not initialised.",
+            )
+
+        # F-08: rate limit
+        if not limiter.is_allowed():
+            return types.TextContent(
+                type="text",
+                text="Rate limit exceeded. Please wait before retrying.",
+            )
+
+        # Workaround for clients that pass all arguments as a single string
+        if "kwargs" in kwargs and isinstance(kwargs["kwargs"], str) and "=" in kwargs["kwargs"]:
+            try:
+                key, value = kwargs["kwargs"].split("=", 1)
+                kwargs = {key: value}
+            except Exception:
+                pass
+
+        logger.info("Executing '%s' with args: %s", tool_name, kwargs)
+
+        try:
+            local_route = route
+
+            path_params = {}
+            query_params = {}
+            request_body = {}
+
+            # F-03: validate kwarg value types
+            for k, v in kwargs.items():
+                if not isinstance(v, (str, int, float, bool, list, dict, type(None))):
+                    return types.TextContent(
+                        type="text",
+                        text=f"Invalid type for parameter '{k}'.",
+                    )
+
+            # Separate parameters by location
+            for p_info in params_info:
+                p_name = p_info["name"]
+                if p_name in kwargs:
+                    loc = p_info.get("location", "query")
+                    if loc == "path":
+                        path_params[p_name] = kwargs[p_name]
+                    elif loc == "query":
+                        query_params[p_name] = kwargs[p_name]
+
+            # Body parameters for POST/PUT/PATCH
+            if api_method.lower() in ("post", "put", "patch"):
+                body_keys = (
+                    set(kwargs.keys())
+                    - set(path_params.keys())
+                    - set(query_params.keys())
+                )
+                for k in body_keys:
+                    request_body[k] = kwargs[k]
+
+            # Format path parameters into the route
+            if path_params:
+                try:
+                    local_route = local_route.format(**path_params)
+                except KeyError as exc:
+                    return types.TextContent(
+                        type="text",
+                        text=f"Missing required path parameter: {exc}",
+                    )
+
+            response = session.call_route(
+                method_type=api_method,
+                route=local_route,
+                params=query_params,
+                body=request_body if request_body else None,
+            )
+
+            logger.info("Response from '%s' received", tool_name)
+            return types.TextContent(type="text", text=str(response))
+
+        except Exception:
+            # F-07: log internally, return generic message
+            logger.exception("Error in tool '%s'", tool_name)
+            return types.TextContent(
+                type="text",
+                text="An error occurred while processing your request.",
+            )
+
+    # Attach metadata so FastMCP picks up the name and docstring
+    handler.__name__ = tool_name
+    handler.__qualname__ = tool_name
+    handler.__doc__ = tool_doc
+    return handler
+
 
 def register_all_apis():
+    """Load the OpenAPI schema and register each endpoint as an MCP tool."""
     apis = load_apis()
+
+    # We pass a *callable* that returns the current quickbooks session so
+    # tools can tolerate a late or re-initialised session.
+    def _qb_ref():
+        return quickbooks
+
     for api in apis:
         response_description = api["response_description"]
 
-        # Clean up the route and remove the company/realm part
-        original_route = api['route']
-        if '/v3/company/{realmId}' in original_route:
-            clean_api_route = original_route.replace('/v3/company/{realmId}', '')
+        # Clean route — remove the company/realm prefix
+        original_route = api["route"]
+        if "/v3/company/{realmId}" in original_route:
+            clean_route = original_route.replace("/v3/company/{realmId}", "")
         else:
-            clean_api_route = original_route
+            clean_route = original_route
 
-        clean_route_for_name = (clean_api_route.replace('/', '_').replace('-', '_').replace(':', '_')
-                               .replace('{', '').replace('}', ''))
-
-        method_name = f'{api["method"]}{clean_route_for_name}'
-        clean_summary = api["summary"]
-        if clean_summary is None:
-            words = method_name.split('_')
-            words[0] = words[0].capitalize()
-            clean_summary = ' '.join(words) + '. '
-
-        doc = clean_summary + '. '
-        if response_description != "OK":
-            doc += f'If successful, the outcome will be \"{api["response_description"]}\". '
-        
-        # Combine request_data and parameters for the docstring
-        all_params = {}
-        api_params_filtered = [p for p in api.get('parameters', []) if p['name'] != 'realmId']
-
-        if api_params_filtered:
-            for p in api_params_filtered:
-                all_params[p['name']] = {
-                    'description': p.get('description', 'No description provided'),
-                    'required': p.get('required', False),
-                    'type': p.get('type', 'unknown'),
-                    'in': p.get('location')
-                }
-        
-        if api.get('request_data'):
-            doc += f'The request body should be a JSON object with the following structure: {json.dumps(api["request_data"])}. '
-
-        if all_params:
-            doc += f'Parameters: {json.dumps(all_params, indent=2)}. '
-
-        # Create a more structured tool function definition
-        method_str = f"""
-@mcp.tool()
-def {method_name}(**kwargs) -> types.TextContent:
-    \"\"\"{doc}\"\"\"
-    
-    # Check if QuickBooks is initialized
-    if quickbooks is None:
-        return types.TextContent(type='text', text="Error: QuickBooks session not initialized. Please check your credentials and restart the server.")
-    
-    # Workaround for clients that pass all arguments as a single string in 'kwargs'
-    if 'kwargs' in kwargs and isinstance(kwargs['kwargs'], str) and '=' in kwargs['kwargs']:
-        try:
-            key, value = kwargs['kwargs'].split('=', 1)
-            # Overwrite kwargs with the parsed arguments
-            kwargs = {{key: value}}
-        except Exception:
-            # If parsing fails, do nothing and proceed with the original kwargs
-            pass
-
-    print(f"Executing '{method_name}' with arguments: {{kwargs}}", file=sys.stderr)
-    
-    try:
-        route = \"{clean_api_route}\"
-        api_method = \"{api['method']}\"
-        
-        path_params = {{}}
-        query_params = {{}}
-        request_body = {{}}
-
-        # Separate parameters based on their location ('in')
-        api_params = {api_params_filtered}
-        for p_info in api_params:
-            p_name = p_info['name']
-            if p_name in kwargs:
-                if p_info['location'] == 'path':
-                    path_params[p_name] = kwargs[p_name]
-                elif p_info['location'] == 'query':
-                    query_params[p_name] = kwargs[p_name]
-
-        # The rest of kwargs are assumed to be the request body for POST/PUT/PATCH
-        if api_method.lower() in ['post', 'put', 'patch']:
-            body_keys = set(kwargs.keys()) - set(path_params.keys()) - set(query_params.keys())
-            for k in body_keys:
-                request_body[k] = kwargs[k]
-
-        # Format the route with path parameters
-        if path_params:
-            try:
-                route = route.format(**path_params)
-            except KeyError as e:
-                return types.TextContent(type='text', text=f"Error: Missing required path parameter {{e}} for route {{route}}")
-
-        response = quickbooks.call_route(
-            method_type=api_method,
-            route=route,
-            params=query_params,
-            body=request_body if request_body else None
+        clean_name = (
+            clean_route.replace("/", "_")
+            .replace("-", "_")
+            .replace(":", "_")
+            .replace("{", "")
+            .replace("}", "")
         )
-        
-        print(f"Response from '{method_name}': {{response}}", file=sys.stderr)
-        return types.TextContent(type='text', text=str(response))
-    except Exception as e:
-        error_msg = f"Error executing {method_name}: {{e}}"
-        print(error_msg, file=sys.stderr)
-        return types.TextContent(type='text', text=error_msg)
-"""
-        exec(method_str, globals(), locals())
+        tool_name = f'{api["method"]}{clean_name}'
+
+        # Build docstring
+        summary = api.get("summary")
+        if summary is None:
+            words = tool_name.split("_")
+            words[0] = words[0].capitalize()
+            summary = " ".join(words) + "."
+
+        doc = summary + ". "
+        if response_description != "OK":
+            doc += f'If successful, the outcome will be "{response_description}". '
+
+        params_filtered = [
+            p for p in api.get("parameters", []) if p["name"] != "realmId"
+        ]
+        if api.get("request_data"):
+            doc += (
+                "The request body should be a JSON object with the "
+                f"following structure: {json.dumps(api['request_data'])}. "
+            )
+        if params_filtered:
+            param_summary = {
+                p["name"]: {
+                    "description": p.get("description", ""),
+                    "required": p.get("required", False),
+                    "type": p.get("type", "unknown"),
+                    "in": p.get("location"),
+                }
+                for p in params_filtered
+            }
+            doc += f"Parameters: {json.dumps(param_summary, indent=2)}. "
+
+        config = {
+            "route": clean_route,
+            "method": api["method"],
+            "parameters": params_filtered,
+            "docstring": doc,
+            "tool_name": tool_name,
+        }
+
+        handler = _make_api_tool(config, _qb_ref, rate_limiter)
+        mcp.tool()(handler)
+
+    logger.info("Registered %d API tools from OpenAPI schema", len(apis))
+
 
 register_all_apis()
 
 if __name__ == "__main__":
-    print("Starting MCP server...")
-    mcp.run(transport='stdio') 
+    logger.info("Starting QuickBooks MCP server")
+    mcp.run(transport="stdio")
