@@ -80,7 +80,7 @@ class TestQueryValidationFuzzing:
             assert "Only SELECT queries are permitted" not in result.text
 
     @given(st.text(alphabet="DELETE;DROP", min_size=1, max_size=100))
-    @settings(deadline=None, max_examples=50, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_dangerous_keywords_always_blocked(self, query_string):
         """Queries with dangerous keywords are blocked."""
         from main_quickbooks_mcp import query_quickbooks
