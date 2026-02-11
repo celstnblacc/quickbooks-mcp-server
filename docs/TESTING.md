@@ -6,7 +6,7 @@ This document describes the comprehensive test suite for the QuickBooks MCP Serv
 
 ```bash
 # Install dependencies
-pip install -r requirements-test.txt
+uv sync --extra test
 
 # Fast tests only (2 minutes)
 ../scripts/run_tests.sh --fast
@@ -411,7 +411,7 @@ See [MUTATION_TESTING.md](MUTATION_TESTING.md) for full guide.
 
 ```bash
 # Install dependencies
-pip install -r requirements-test.txt
+uv sync --extra test
 
 # Fast mode (~2 minutes)
 ../scripts/run_tests.sh --fast

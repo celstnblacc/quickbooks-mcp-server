@@ -77,10 +77,10 @@ Successfully implemented **10 missing test types** totaling **~470 tests** acros
 - `tests/test_documentation.py` (20 tests)
 - `tests/test_stress.py` (20 tests) *(already existed, enhanced)*
 
-### Configuration Files (3 new)
+### Configuration Files (2 new)
 - `tox.ini` - Multi-Python version testing
 - `.mutmut-config.py` - Mutation testing config
-- `requirements-test.txt` - Test dependencies
+- `pyproject.toml` - Updated with optional test dependencies
 
 ### Scripts (2 new)
 - `run_mutation_tests.sh` - Mutation testing runner
@@ -117,7 +117,7 @@ Successfully implemented **10 missing test types** totaling **~470 tests** acros
 ### Quick Start
 ```bash
 # Install test dependencies
-pip install -r requirements-test.txt
+uv sync --extra test
 
 # Run standard test suite
 ../scripts/run_tests.sh

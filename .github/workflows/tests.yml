@@ -19,9 +19,9 @@ jobs:
       with:
         python-version: '3.12'
     - name: Install dependencies
-      run: pip install -r requirements-test.txt
+      run: pip install uv && uv sync --extra test
     - name: Run fast tests
-      run: ./run_tests.sh --fast
+      run: ./scripts/run_tests.sh --fast
 
   standard-tests:
     name: Standard Test Suite (15 min)
@@ -33,9 +33,9 @@ jobs:
       with:
         python-version: '3.12'
     - name: Install dependencies
-      run: pip install -r requirements-test.txt
+      run: pip install uv && uv sync --extra test
     - name: Run standard test suite with coverage
-      run: ./run_tests.sh --coverage --no-integration
+      run: ./scripts/run_tests.sh --coverage --no-integration
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
@@ -54,6 +54,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: pip install -r requirements-test.txt
+      run: pip install uv && uv sync --extra test
     - name: Run compatibility tests
       run: pytest tests/test_compatibility.py -v

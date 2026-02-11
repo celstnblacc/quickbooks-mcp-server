@@ -4,7 +4,7 @@
 
 ```bash
 # Install test dependencies
-pip install -r requirements-test.txt
+uv sync --extra test
 
 # Run all core tests (fast, ~2-5 minutes)
 ../scripts/run_tests.sh
@@ -236,7 +236,7 @@ Time: ~1 hour
 
 ### Install All
 ```bash
-pip install -r requirements-test.txt
+uv sync --extra test
 ```
 
 ## Test Data Requirements

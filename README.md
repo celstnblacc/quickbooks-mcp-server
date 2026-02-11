@@ -154,10 +154,10 @@ The project includes a comprehensive test suite with **82 tests** across 9 test 
 
 ```bash
 # Install test dependencies
-pip install pytest pytest-mock
+uv sync --extra test
 
 # Run all tests
-python -m pytest tests/ -v
+pytest tests/ -v
 ```
 
 ### Test coverage by security fix

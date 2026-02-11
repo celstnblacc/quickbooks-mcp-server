@@ -24,7 +24,7 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 
 ### Configuration Files
 - **[pyproject.toml](../pyproject.toml)** - Python project configuration
-- **[requirements-test.txt](../requirements-test.txt)** - Test dependencies
+- **[pyproject.toml [test]](../pyproject.toml [test])** - Test dependencies
 - **[tox.ini](../tox.ini)** - Multi-version Python testing configuration
 - **[config/env_template.txt](../config/env_template.txt)** - Template for `.env` file
 
@@ -114,7 +114,7 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 ### Configuration
 - **Environment variables**: [README.md](../README.md) - Step 2
 - **Claude Desktop setup**: [README.md](../README.md) - Step 3
-- **Test configuration**: [tox.ini](../tox.ini), [requirements-test.txt](../requirements-test.txt)
+- **Test configuration**: [tox.ini](../tox.ini), [pyproject.toml [test]](../pyproject.toml [test])
 
 ## 📖 Documentation Files
 
@@ -134,7 +134,7 @@ Complete guide to all documentation for the QuickBooks MCP Server.
 
 ### Configuration
 9. [pyproject.toml](../pyproject.toml) - Project metadata
-10. [requirements-test.txt](../requirements-test.txt) - Test dependencies
+10. [pyproject.toml [test]](../pyproject.toml [test]) - Test dependencies
 11. [tox.ini](../tox.ini) - Multi-version testing
 12. [config/env_template.txt](../config/env_template.txt) - Environment template
 

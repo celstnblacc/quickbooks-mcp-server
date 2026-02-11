@@ -33,7 +33,7 @@ uv run src/main_quickbooks_mcp.py
 ### Testing
 ```bash
 # Install test dependencies
-pip install pytest pytest-mock
+uv sync --extra test
 
 # Run all test types (recommended)
 ./scripts/run_tests.sh

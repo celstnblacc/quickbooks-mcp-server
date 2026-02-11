@@ -55,7 +55,7 @@ jobs:
       with:
         python-version: '3.12'
     - name: Install dependencies
-      run: pip install -r requirements-test.txt
+      run: pip install uv && uv sync --extra test
     - name: Run fast tests
       run: ./run_tests.sh --fast
 
@@ -69,7 +69,7 @@ jobs:
       with:
         python-version: '3.12'
     - name: Install dependencies
-      run: pip install -r requirements-test.txt
+      run: pip install uv && uv sync --extra test
     - name: Run standard test suite with coverage
       run: ./run_tests.sh --coverage --no-integration
     - name: Upload coverage
@@ -90,7 +90,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: pip install -r requirements-test.txt
+      run: pip install uv && uv sync --extra test
     - name: Run compatibility tests
       run: pytest tests/test_compatibility.py -v
 EOF
