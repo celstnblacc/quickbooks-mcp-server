@@ -64,12 +64,13 @@ class TestQueryValidationFuzzing:
         result = query_quickbooks(query_string)
         assert result.text is not None
 
-    @given(st.text(min_size=0, max_size=100).filter(lambda x: "SELECT" in x.upper()))
-    @settings(deadline=None, max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.filter_too_much])
-    def test_queries_with_select_keyword(self, query_string):
+    @given(prefix=st.text(max_size=20), suffix=st.text(max_size=20))
+    @settings(deadline=None, max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    def test_queries_with_select_keyword(self, prefix, suffix):
         """Queries containing SELECT are processed correctly."""
         from main_quickbooks_mcp import query_quickbooks
 
+        query_string = f"{prefix}SELECT{suffix}"
         result = query_quickbooks(query_string)
 
         # Should not crash
@@ -105,11 +106,13 @@ class TestRateLimiterFuzzing:
 
         limiter = RateLimiter(requests_per_minute=capacity)
 
-        # Should allow up to capacity requests
-        allowed = sum(1 for _ in range(min(capacity + 10, 1000)) if limiter.is_allowed())
+        # Should allow up to capacity requests (capped at 1000 for performance)
+        max_requests = min(capacity + 10, 1000)
+        allowed = sum(1 for _ in range(max_requests) if limiter.is_allowed())
 
-        # Should allow roughly the capacity (within 10%)
-        assert capacity * 0.9 <= allowed <= capacity * 1.1 or capacity < 10
+        # Should allow roughly the expected amount (within 10%)
+        expected = min(capacity, max_requests)
+        assert expected * 0.9 <= allowed <= expected * 1.1 or capacity < 10
 
     @given(st.lists(st.booleans(), min_size=10, max_size=100))
     @settings(deadline=None, max_examples=50)
