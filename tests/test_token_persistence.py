@@ -26,11 +26,9 @@ class TestUpdatesExistingLine:
         session = _make_session()
         session.refresh_token = "brand_new_token"
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_env_file.parent
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(tmp_env_file)):
             session._persist_refresh_token()
 
         content = tmp_env_file.read_text()
@@ -46,11 +44,9 @@ class TestAppendsIfMissing:
         session = _make_session()
         session.refresh_token = "appended_token"
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_path
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
             session._persist_refresh_token()
 
         content = env_file.read_text()
@@ -65,11 +61,9 @@ class TestNoCrashMissingFile:
         session = _make_session()
         session.refresh_token = "whatever"
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_path
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
             session._persist_refresh_token()  # should not raise
 
 
@@ -78,11 +72,9 @@ class TestOtherLinesPreserved:
         session = _make_session()
         session.refresh_token = "updated"
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_env_file.parent
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(tmp_env_file)):
             session._persist_refresh_token()
 
         content = tmp_env_file.read_text()
@@ -96,11 +88,9 @@ class TestNoDuplicateLines:
     def test_persist_twice_no_duplication(self, tmp_env_file):
         session = _make_session()
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_env_file.parent
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(tmp_env_file)):
             session.refresh_token = "first_update"
             session._persist_refresh_token()
             session.refresh_token = "second_update"

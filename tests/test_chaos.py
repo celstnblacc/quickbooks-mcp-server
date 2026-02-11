@@ -39,11 +39,9 @@ class TestDiskFailures:
 
         # Simulate disk full (OSError on write)
         with patch("pathlib.Path.write_text", side_effect=OSError("No space left on device")):
-            # Patch Path in quickbooks_interaction module to return mock that points to test env
-            with patch("quickbooks_interaction.Path") as mock_path_class:
-                mock_instance = MagicMock()
-                mock_instance.parent = tmp_path
-                mock_path_class.return_value = mock_instance
+            # Patch __file__ in quickbooks_interaction module to point to test directory
+            import quickbooks_interaction
+            with patch.object(quickbooks_interaction, '__file__', str(env_file)):
                 # Should log warning but not crash
                 session._persist_refresh_token()
 
@@ -215,11 +213,9 @@ class TestFileSystemChaos:
         # Delete env file
         env_file.unlink()
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_path
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
             # Should handle gracefully (log error, continue)
             session._persist_refresh_token()
 
@@ -346,11 +342,9 @@ class TestConcurrencyRaceConditions:
 
         def write_worker(thread_id):
             session.refresh_token = f"token_{thread_id}"
-            # Patch Path in quickbooks_interaction module to return mock that points to test env
-            with patch("quickbooks_interaction.Path") as mock_path_class:
-                mock_instance = MagicMock()
-                mock_instance.parent = tmp_path
-                mock_path_class.return_value = mock_instance
+            # Patch __file__ in quickbooks_interaction module to point to test directory
+            import quickbooks_interaction
+            with patch.object(quickbooks_interaction, '__file__', str(env_file)):
                 session._persist_refresh_token()
 
         threads = [threading.Thread(target=write_worker, args=(i,)) for i in range(10)]

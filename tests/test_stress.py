@@ -293,11 +293,9 @@ class TestTokenPersistenceStress:
             from quickbooks_interaction import QuickBooksSession
             session = QuickBooksSession()
 
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_path
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
             for i in range(100):
                 session.refresh_token = f"token_{i}"
                 session._persist_refresh_token()
@@ -330,11 +328,9 @@ class TestTokenPersistenceStress:
         session.refresh_token = "new_token"
 
         start = time.time()
-        # Patch Path in quickbooks_interaction module to return mock that points to test env
-        with patch("quickbooks_interaction.Path") as mock_path_class:
-            mock_instance = MagicMock()
-            mock_instance.parent = tmp_path
-            mock_path_class.return_value = mock_instance
+        # Patch __file__ in quickbooks_interaction module to point to test directory
+        import quickbooks_interaction
+        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
             session._persist_refresh_token()
         elapsed = time.time() - start
 
