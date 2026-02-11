@@ -26,10 +26,7 @@ class TestUpdatesExistingLine:
         session = _make_session()
         session.refresh_token = "brand_new_token"
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(tmp_env_file)):
-            session._persist_refresh_token()
+        session._persist_refresh_token(env_path=tmp_env_file)
 
         content = tmp_env_file.read_text()
         assert "QUICKBOOKS_REFRESH_TOKEN=brand_new_token" in content
@@ -44,10 +41,7 @@ class TestAppendsIfMissing:
         session = _make_session()
         session.refresh_token = "appended_token"
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            session._persist_refresh_token()
+        session._persist_refresh_token(env_path=env_file)
 
         content = env_file.read_text()
         assert "QUICKBOOKS_REFRESH_TOKEN=appended_token" in content
@@ -61,10 +55,7 @@ class TestNoCrashMissingFile:
         session = _make_session()
         session.refresh_token = "whatever"
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            session._persist_refresh_token()  # should not raise
+        session._persist_refresh_token(env_path=env_file)  # should not raise
 
 
 class TestOtherLinesPreserved:
@@ -72,10 +63,7 @@ class TestOtherLinesPreserved:
         session = _make_session()
         session.refresh_token = "updated"
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(tmp_env_file)):
-            session._persist_refresh_token()
+        session._persist_refresh_token(env_path=tmp_env_file)
 
         content = tmp_env_file.read_text()
         assert "QUICKBOOKS_CLIENT_ID=id123" in content
@@ -88,13 +76,10 @@ class TestNoDuplicateLines:
     def test_persist_twice_no_duplication(self, tmp_env_file):
         session = _make_session()
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(tmp_env_file)):
-            session.refresh_token = "first_update"
-            session._persist_refresh_token()
-            session.refresh_token = "second_update"
-            session._persist_refresh_token()
+        session.refresh_token = "first_update"
+        session._persist_refresh_token(env_path=tmp_env_file)
+        session.refresh_token = "second_update"
+        session._persist_refresh_token(env_path=tmp_env_file)
 
         content = tmp_env_file.read_text()
         count = content.count("QUICKBOOKS_REFRESH_TOKEN=")

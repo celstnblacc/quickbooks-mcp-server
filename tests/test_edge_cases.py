@@ -57,10 +57,7 @@ class TestEnvPersistenceEdgeCases:
 
         session.refresh_token = "new_tok"
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            session._persist_refresh_token()
+        session._persist_refresh_token(env_path=env_file)
 
         content = env_file.read_text()
         assert "QUICKBOOKS_REFRESH_TOKEN=new_tok" in content

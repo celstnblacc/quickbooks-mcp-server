@@ -293,12 +293,9 @@ class TestTokenPersistenceStress:
             from quickbooks_interaction import QuickBooksSession
             session = QuickBooksSession()
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            for i in range(100):
-                session.refresh_token = f"token_{i}"
-                session._persist_refresh_token()
+        for i in range(100):
+            session.refresh_token = f"token_{i}"
+            session._persist_refresh_token(env_path=env_file)
 
         content = env_file.read_text()
         assert "QUICKBOOKS_REFRESH_TOKEN=token_99" in content
@@ -328,10 +325,7 @@ class TestTokenPersistenceStress:
         session.refresh_token = "new_token"
 
         start = time.time()
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            session._persist_refresh_token()
+        session._persist_refresh_token(env_path=env_file)
         elapsed = time.time() - start
 
         # Should be fast even with large file

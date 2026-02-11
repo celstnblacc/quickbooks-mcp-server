@@ -368,11 +368,8 @@ class TestConcurrentFailures:
             from quickbooks_interaction import QuickBooksSession
             session = QuickBooksSession()
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            # Should log warning but not crash
-            session._persist_refresh_token()
+        # Should log warning but not crash
+        session._persist_refresh_token(env_path=env_file)
 
         # Session should still be usable
         assert session.refresh_token == "rt_new"

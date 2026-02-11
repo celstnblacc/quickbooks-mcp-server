@@ -39,11 +39,8 @@ class TestDiskFailures:
 
         # Simulate disk full (OSError on write)
         with patch("pathlib.Path.write_text", side_effect=OSError("No space left on device")):
-            # Patch __file__ in quickbooks_interaction module to point to test directory
-            import quickbooks_interaction
-            with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-                # Should log warning but not crash
-                session._persist_refresh_token()
+            # Should log warning but not crash
+            session._persist_refresh_token(env_path=env_file)
 
         # Session should still be usable
         assert session.refresh_token == "rt_new"
@@ -213,11 +210,8 @@ class TestFileSystemChaos:
         # Delete env file
         env_file.unlink()
 
-        # Patch __file__ in quickbooks_interaction module to point to test directory
-        import quickbooks_interaction
-        with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-            # Should handle gracefully (log error, continue)
-            session._persist_refresh_token()
+        # Should handle gracefully (log error, continue)
+        session._persist_refresh_token(env_path=env_file)
 
         # Session should still work
         assert session.access_token == "at"
@@ -342,10 +336,7 @@ class TestConcurrencyRaceConditions:
 
         def write_worker(thread_id):
             session.refresh_token = f"token_{thread_id}"
-            # Patch __file__ in quickbooks_interaction module to point to test directory
-            import quickbooks_interaction
-            with patch.object(quickbooks_interaction, '__file__', str(env_file)):
-                session._persist_refresh_token()
+            session._persist_refresh_token(env_path=env_file)
 
         threads = [threading.Thread(target=write_worker, args=(i,)) for i in range(10)]
         for t in threads:

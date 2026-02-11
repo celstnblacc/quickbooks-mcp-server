@@ -54,9 +54,10 @@ class QuickBooksSession:
             "Accept": "application/json",
         }
 
-    def _persist_refresh_token(self):
+    def _persist_refresh_token(self, env_path=None):
         """Write the current refresh token back to the .env file (F-06)."""
-        env_path = Path(__file__).parent / ".env"
+        if env_path is None:
+            env_path = Path(__file__).parent / ".env"
         if not env_path.exists():
             logger.debug(".env file not found; skipping token persistence")
             return
