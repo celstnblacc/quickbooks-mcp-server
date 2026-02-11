@@ -273,7 +273,7 @@ class TestAPISchemaStability:
 
     def test_entity_schema_structure_stable(self):
         """Entity schema has expected structure."""
-        schema_path = PROJECT_ROOT / "quickbooks_entity_schemas.json"
+        schema_path = PROJECT_ROOT / "data" / "quickbooks_entity_schemas.json"
         with open(schema_path) as f:
             schemas = json.load(f)
 
