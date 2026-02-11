@@ -153,7 +153,16 @@ class QuickBooksSession:
             return {"error": f"Network error: {type(exc).__name__}"}
 
         if response.status_code == 200:
-            return response.json()
+            try:
+                return response.json()
+            except (ValueError, TypeError) as exc:
+                logger.error(
+                    "Invalid JSON response from %s %s: %s",
+                    method_lower.upper(),
+                    route,
+                    exc,
+                )
+                return {"error": "Invalid JSON response from API"}
 
         if response.status_code == 401:
             logger.info("Access token expired — refreshing")
@@ -169,7 +178,16 @@ class QuickBooksSession:
                 )
                 return {"error": f"Network error: {type(exc).__name__}"}
             if response.status_code == 200:
-                return response.json()
+                try:
+                    return response.json()
+                except (ValueError, TypeError) as exc:
+                    logger.error(
+                        "Invalid JSON response from %s %s: %s",
+                        method_lower.upper(),
+                        route,
+                        exc,
+                    )
+                    return {"error": "Invalid JSON response from API"}
 
         # F-07: never leak raw response body to the caller
         logger.error(
