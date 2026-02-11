@@ -213,7 +213,7 @@ QUICKBOOKS_ENV=sandbox
 """)
 
         from dotenv import load_dotenv
-        load_dotenv(env_file)
+        load_dotenv(env_file, override=True)
 
         import os
         assert os.getenv("QUICKBOOKS_CLIENT_ID") == "test_id"
@@ -232,7 +232,7 @@ QUICKBOOKS_ENV=sandbox
 """)
 
         from dotenv import load_dotenv
-        load_dotenv(env_file)
+        load_dotenv(env_file, override=True)
 
         import os
         assert os.getenv("QUICKBOOKS_CLIENT_ID") == "test_id"
@@ -247,7 +247,7 @@ QUICKBOOKS_REFRESH_TOKEN=test_token
 """)
 
         from dotenv import load_dotenv
-        load_dotenv(env_file)
+        load_dotenv(env_file, override=True)
 
         # Should handle quotes correctly
         import os
