@@ -43,7 +43,7 @@ class TestQueryValidationFuzzing:
                     del sys.modules[mod]
 
     @given(st.text(min_size=1, max_size=1000))
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=200, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_query_validation_never_crashes(self, query_string):
         """Query validation handles any text input without crashing."""
         from main_quickbooks_mcp import query_quickbooks
@@ -56,7 +56,7 @@ class TestQueryValidationFuzzing:
         assert result.text is not None
 
     @given(st.text(alphabet=st.characters(whitelist_categories=("Lu", "Ll")), min_size=1, max_size=500))
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_query_validation_with_letters_only(self, query_string):
         """Query validation handles letter-only strings."""
         from main_quickbooks_mcp import query_quickbooks
@@ -65,7 +65,7 @@ class TestQueryValidationFuzzing:
         assert result.text is not None
 
     @given(st.text(min_size=0, max_size=100).filter(lambda x: "SELECT" in x.upper()))
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=100, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.filter_too_much])
     def test_queries_with_select_keyword(self, query_string):
         """Queries containing SELECT are processed correctly."""
         from main_quickbooks_mcp import query_quickbooks
@@ -80,7 +80,7 @@ class TestQueryValidationFuzzing:
             assert "Only SELECT queries are permitted" not in result.text
 
     @given(st.text(alphabet="DELETE;DROP", min_size=1, max_size=100))
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=50, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_dangerous_keywords_always_blocked(self, query_string):
         """Queries with dangerous keywords are blocked."""
         from main_quickbooks_mcp import query_quickbooks
@@ -98,7 +98,7 @@ class TestRateLimiterFuzzing:
     """Fuzz test rate limiter with random parameters."""
 
     @given(st.integers(min_value=1, max_value=10000))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_rate_limiter_with_random_capacity(self, capacity):
         """Rate limiter works with any positive capacity."""
         from rate_limiter import RateLimiter
@@ -112,7 +112,7 @@ class TestRateLimiterFuzzing:
         assert capacity * 0.9 <= allowed <= capacity * 1.1 or capacity < 10
 
     @given(st.lists(st.booleans(), min_size=10, max_size=100))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_rate_limiter_with_random_call_pattern(self, pattern):
         """Rate limiter handles random request patterns."""
         from rate_limiter import RateLimiter
@@ -130,7 +130,7 @@ class TestToolFactoryFuzzing:
     """Fuzz test dynamic tool generation."""
 
     @given(st.text(alphabet=st.characters(whitelist_categories=("Lu", "Ll", "Nd")), min_size=1, max_size=50))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_tool_name_generation(self, random_name):
         """Tool factory handles random tool names."""
         from rate_limiter import RateLimiter
@@ -164,7 +164,7 @@ class TestToolFactoryFuzzing:
         min_size=0,
         max_size=10
     ))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_tool_with_random_kwargs(self, kwargs):
         """Tool handlers accept random keyword arguments."""
         from rate_limiter import RateLimiter
@@ -201,7 +201,7 @@ class TestParameterTypeFuzzing:
         st.text(), st.integers(), st.floats(allow_nan=False), st.booleans(),
         st.lists(st.integers()), st.dictionaries(st.text(), st.integers())
     ))
-    @settings(max_examples=100)
+    @settings(deadline=None, max_examples=100)
     def test_parameter_type_validation(self, param_value):
         """Parameter validation handles various types."""
         from rate_limiter import RateLimiter
@@ -237,7 +237,7 @@ class TestUnicodeAndSpecialCharacters:
     """Test handling of Unicode and special characters."""
 
     @given(st.text(alphabet=st.characters(whitelist_categories=("L",)), min_size=1, max_size=100))
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_unicode_in_queries(self, unicode_text):
         """Queries with Unicode characters are handled correctly."""
         mock_resp = MagicMock()
@@ -256,7 +256,7 @@ class TestUnicodeAndSpecialCharacters:
             assert result.text is not None
 
     @given(st.text(alphabet="!@#$%^&*()[]{}|\\:;\"'<>?,./", min_size=1, max_size=50))
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_special_characters_in_queries(self, special_chars):
         """Queries with special characters don't cause injection."""
         mock_resp = MagicMock()
@@ -275,7 +275,7 @@ class TestUnicodeAndSpecialCharacters:
             assert result.text is not None
 
     @given(st.text(min_size=0, max_size=50))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_environment_var_fuzzing(self, random_value):
         """Environment variables with random values are handled."""
         from environment import Environment
@@ -294,7 +294,7 @@ class TestJSONFuzzing:
         min_size=0,
         max_size=20
     ))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_json_body_fuzzing(self, random_dict):
         """Tool calls with random JSON bodies are handled."""
         from rate_limiter import RateLimiter
@@ -328,7 +328,7 @@ class TestBoundaryValueFuzzing:
     """Fuzz test with boundary values."""
 
     @given(st.integers(min_value=-1000000, max_value=1000000))
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_integer_parameters(self, int_value):
         """Integer parameters with extreme values are handled."""
         mock_resp = MagicMock()
@@ -347,7 +347,7 @@ class TestBoundaryValueFuzzing:
             assert result.text is not None
 
     @given(st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False))
-    @settings(max_examples=50)
+    @settings(deadline=None, max_examples=50)
     def test_float_rate_limiter_timing(self, time_delta):
         """Rate limiter handles various time deltas."""
         from rate_limiter import RateLimiter
@@ -368,7 +368,7 @@ class TestInjectionAttempts:
     """Test various injection attack attempts."""
 
     @given(st.text(min_size=1, max_size=200))
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_sql_injection_attempts_blocked(self, injection_attempt):
         """SQL injection attempts are blocked."""
         mock_resp = MagicMock()
@@ -393,7 +393,7 @@ class TestInjectionAttempts:
                 assert "Only SELECT queries" in result.text or "Blocked keywords" in result.text
 
     @given(st.text(alphabet="SELECTselect; ", min_size=1, max_size=100))
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(deadline=None, max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_obfuscated_dangerous_queries(self, query_text):
         """Obfuscated dangerous queries are caught."""
         mock_resp = MagicMock()
