@@ -64,6 +64,38 @@ pytest tests/ --cov=. --cov-report=term-missing
 pytest tests/test_rate_limiter.py -v
 ```
 
+## Git Workflow (MANDATORY)
+
+**Before EVERY commit, you MUST:**
+
+1. **Run all tests:**
+   ```bash
+   ./scripts/run_tests.sh --fast
+   # Or for full test suite:
+   ./scripts/run_tests.sh
+   ```
+
+2. **Update documentation:**
+   - Update relevant docs if code changes affect usage
+   - Check: README.md, docs/CLAUDE.md, docs/TESTING.md
+   - Update examples if function signatures changed
+
+3. **Confirm each commit:**
+   - Review all changes: `git status` and `git diff`
+   - Write clear, descriptive commit messages
+   - Follow format: "Action: Description\n\nDetails..."
+
+4. **Confirm before push:**
+   - Review commits: `git log --oneline -5`
+   - Verify branch: `git branch --show-current`
+   - Only push after explicit confirmation
+
+**Never:**
+- ❌ Commit without running tests
+- ❌ Push without updating docs
+- ❌ Auto-push without user confirmation
+- ❌ Skip the verification steps
+
 ## Architecture
 
 ### Entry Point and MCP Setup
