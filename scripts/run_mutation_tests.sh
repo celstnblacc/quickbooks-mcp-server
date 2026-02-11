@@ -15,12 +15,17 @@ echo -e "${BLUE}QuickBooks MCP - Mutation Testing${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Check if mutmut is installed
-if ! command -v mutmut &> /dev/null; then
-    echo -e "${RED}Error: mutmut is not installed${NC}"
-    echo "Install with: pip install mutmut"
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    echo -e "${RED}Error: uv is not installed${NC}"
+    echo "Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
     exit 1
 fi
+
+# Sync dependencies (ensure test dependencies including mutmut are installed)
+echo -e "${BLUE}Syncing dependencies...${NC}"
+uv sync --extra test
+echo ""
 
 # Parse arguments
 CLEAN=false
@@ -70,13 +75,13 @@ echo -e "${YELLOW}This may take 10-30 minutes depending on your system${NC}"
 echo ""
 
 # Configure mutmut to test specific modules
-PATHS_TO_MUTATE="main_quickbooks_mcp.py quickbooks_interaction.py rate_limiter.py environment.py api_importer.py"
+PATHS_TO_MUTATE="src/main_quickbooks_mcp.py src/quickbooks_interaction.py src/rate_limiter.py src/environment.py src/api_importer.py"
 
 echo "Mutating: $PATHS_TO_MUTATE"
 echo ""
 
 # Run mutmut
-if mutmut run --paths-to-mutate="$PATHS_TO_MUTATE" --tests-dir=tests/ --runner="pytest -x -q"; then
+if uv run mutmut run --paths-to-mutate="$PATHS_TO_MUTATE" --tests-dir=tests/ --runner="uv run pytest -x -q"; then
     echo -e "${GREEN}✓ Mutation testing completed${NC}"
 else
     echo -e "${YELLOW}⚠ Mutation testing completed with some survivors${NC}"
@@ -88,7 +93,7 @@ echo -e "${BLUE}Mutation Testing Summary${NC}"
 echo -e "${BLUE}========================================${NC}"
 
 # Show summary
-mutmut results
+uv run mutmut results
 
 echo ""
 echo -e "${YELLOW}Interpreting Results:${NC}"
@@ -106,10 +111,10 @@ if [ "$SHOW_RESULTS" = true ]; then
     echo ""
 
     # Show survived mutations
-    mutmut show survived || echo "No survived mutations (perfect score!)"
+    uv run mutmut show survived || echo "No survived mutations (perfect score!)"
 
     echo ""
-    echo "To view specific mutation: mutmut show <mutation-id>"
+    echo "To view specific mutation: uv run mutmut show <mutation-id>"
 fi
 
 # Calculate mutation score
@@ -122,7 +127,7 @@ echo "A good mutation score is > 80%"
 echo "Excellent mutation score is > 90%"
 echo ""
 echo "To improve score:"
-echo "  1. Review survived mutations: mutmut show survived"
+echo "  1. Review survived mutations: uv run mutmut show survived"
 echo "  2. Add tests to catch those mutations"
 echo "  3. Run again: ./run_mutation_tests.sh"
 echo ""

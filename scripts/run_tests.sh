@@ -33,12 +33,17 @@ echo -e "${BLUE}QuickBooks MCP Server - Test Suite${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Check if pytest is installed
-if ! command -v pytest &> /dev/null; then
-    echo -e "${RED}Error: pytest is not installed${NC}"
-    echo "Install with: pip install pytest pytest-mock"
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    echo -e "${RED}Error: uv is not installed${NC}"
+    echo "Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
     exit 1
 fi
+
+# Sync dependencies (ensure test dependencies are installed)
+echo -e "${BLUE}Syncing dependencies...${NC}"
+uv sync --extra test
+echo ""
 
 # Parse command line arguments
 RUN_COVERAGE=false
@@ -126,18 +131,18 @@ run_test_category() {
 }
 
 # 1. Unit Tests (fast, no credentials needed)
-if run_test_category "Unit Tests" "pytest tests/ -m 'not integration' $VERBOSE" "true"; then
+if run_test_category "Unit Tests" "uv run pytest tests/ -m 'not integration' $VERBOSE" "true"; then
     UNIT_PASSED=true
 fi
 
 # 2. Edge Case Tests
 EDGE_PASSED=false
-if run_test_category "Edge Case Tests" "pytest tests/test_edge_cases.py $VERBOSE" "true"; then
+if run_test_category "Edge Case Tests" "uv run pytest tests/test_edge_cases.py $VERBOSE" "true"; then
     EDGE_PASSED=true
 fi
 
 # 3. Security Regression Tests (always run)
-if run_test_category "Security Regression Tests" "pytest tests/test_security_regression.py $VERBOSE" "true"; then
+if run_test_category "Security Regression Tests" "uv run pytest tests/test_security_regression.py $VERBOSE" "true"; then
     SECURITY_PASSED=true
 fi
 
@@ -145,7 +150,7 @@ fi
 if [ "$FAST_ONLY" = false ]; then
     # 4. Contract/Schema Tests
     if [ -f ".env" ] && grep -q "QUICKBOOKS_CLIENT_ID" .env 2>/dev/null; then
-        if run_test_category "Contract/Schema Tests" "pytest tests/test_contract_schema.py -m integration $VERBOSE" "true"; then
+        if run_test_category "Contract/Schema Tests" "uv run pytest tests/test_contract_schema.py -m integration $VERBOSE" "true"; then
             CONTRACT_PASSED=true
         fi
     else
@@ -153,30 +158,30 @@ if [ "$FAST_ONLY" = false ]; then
     fi
 
     # 5. Error Recovery Tests
-    if run_test_category "Error Recovery Tests" "pytest tests/test_error_recovery.py $VERBOSE" "true"; then
+    if run_test_category "Error Recovery Tests" "uv run pytest tests/test_error_recovery.py $VERBOSE" "true"; then
         ERROR_RECOVERY_PASSED=true
     fi
 
     # 6. Property-Based Tests
-    if run_test_category "Property-Based Tests" "pytest tests/test_property_based.py $VERBOSE" "$RUN_ALL"; then
+    if run_test_category "Property-Based Tests" "uv run pytest tests/test_property_based.py $VERBOSE" "$RUN_ALL"; then
         PROPERTY_PASSED=true
     else
         PROPERTY_PASSED="skipped"
     fi
 
     # 7. Compatibility Tests
-    if run_test_category "Compatibility Tests" "pytest tests/test_compatibility.py $VERBOSE" "true"; then
+    if run_test_category "Compatibility Tests" "uv run pytest tests/test_compatibility.py $VERBOSE" "true"; then
         COMPATIBILITY_PASSED=true
     fi
 
     # 8. Functional Regression Tests
-    if run_test_category "Functional Regression Tests" "pytest tests/test_functional_regression.py -m 'not integration' $VERBOSE" "true"; then
+    if run_test_category "Functional Regression Tests" "uv run pytest tests/test_functional_regression.py -m 'not integration' $VERBOSE" "true"; then
         REGRESSION_PASSED=true
     fi
 
     # 9. E2E Tests (if integration enabled)
     if [ "$RUN_INTEGRATION" = true ] && [ -f ".env" ]; then
-        if run_test_category "End-to-End Tests" "pytest tests/test_e2e.py -m integration $VERBOSE" "true"; then
+        if run_test_category "End-to-End Tests" "uv run pytest tests/test_e2e.py -m integration $VERBOSE" "true"; then
             E2E_PASSED=true
         fi
     else
@@ -185,7 +190,7 @@ if [ "$FAST_ONLY" = false ]; then
 
     # 10. Chaos Tests (only if --all)
     if [ "$RUN_ALL" = true ]; then
-        if run_test_category "Chaos/Fault Injection Tests" "pytest tests/test_chaos.py $VERBOSE" "true"; then
+        if run_test_category "Chaos/Fault Injection Tests" "uv run pytest tests/test_chaos.py $VERBOSE" "true"; then
             CHAOS_PASSED=true
         fi
     else
@@ -193,12 +198,12 @@ if [ "$FAST_ONLY" = false ]; then
     fi
 
     # 11. Observability Tests
-    if run_test_category "Observability/Logging Tests" "pytest tests/test_observability.py $VERBOSE" "true"; then
+    if run_test_category "Observability/Logging Tests" "uv run pytest tests/test_observability.py $VERBOSE" "true"; then
         OBSERVABILITY_PASSED=true
     fi
 
     # 12. Documentation Tests
-    if run_test_category "Documentation Tests" "pytest tests/test_documentation.py $VERBOSE" "true"; then
+    if run_test_category "Documentation Tests" "uv run pytest tests/test_documentation.py $VERBOSE" "true"; then
         DOCUMENTATION_PASSED=true
     fi
 else
@@ -231,7 +236,7 @@ for arg in "$@"; do
 done
 
 if [ "$RUN_STRESS" = true ] && [ -f "tests/test_stress.py" ]; then
-    if run_test_category "Stress Tests" "pytest tests/test_stress.py $VERBOSE" "true"; then
+    if run_test_category "Stress Tests" "uv run pytest tests/test_stress.py $VERBOSE" "true"; then
         STRESS_PASSED=true
     fi
 else
@@ -242,7 +247,7 @@ fi
 if [ "$RUN_INTEGRATION" = true ]; then
     # Check if credentials are available
     if [ -f ".env" ] && grep -q "QUICKBOOKS_CLIENT_ID" .env 2>/dev/null; then
-        if run_test_category "Integration Tests" "pytest tests/ -m 'integration' $VERBOSE" "true"; then
+        if run_test_category "Integration Tests" "uv run pytest tests/ -m 'integration' $VERBOSE" "true"; then
             INTEGRATION_PASSED=true
         fi
     else
@@ -265,7 +270,7 @@ if [ "$RUN_COVERAGE" = true ]; then
     echo -e "${BLUE}----------------------------------------${NC}"
 
     # Build coverage command
-    COV_CMD="pytest tests/"
+    COV_CMD="uv run pytest tests/"
     if [ "$RUN_INTEGRATION" = false ]; then
         COV_CMD="$COV_CMD -m 'not integration'"
     fi
