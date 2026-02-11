@@ -12,6 +12,22 @@ Being listed and certified on MCP Review ensures this server adheres to MCP stan
 
 ---
 
+## 🧪 Test Status
+
+**All Tests Passing!** ✅
+
+- **273/275 tests passing** (2 platform-specific tests skipped)
+- **0 failures**
+- Comprehensive test suite covering security, performance, edge cases, and integration
+- See [TESTING.md](docs/TESTING.md) for details
+
+```bash
+# Run tests
+./scripts/run_tests.sh --fast
+```
+
+---
+
 ## Requirements:
 1. Python 3.10 or higher
 
