@@ -131,7 +131,7 @@ class TestSchemaResponseStructure:
 
     def test_entity_schema_fields(self):
         """Entity schemas define field types and descriptions."""
-        entity_schema_path = PROJECT_ROOT / "quickbooks_entity_schemas.json"
+        entity_schema_path = PROJECT_ROOT / "data" / "quickbooks_entity_schemas.json"
         with open(entity_schema_path) as f:
             entity_schemas = json.load(f)
 
