@@ -15,6 +15,12 @@ ALLOWED_METHODS = frozenset({"get", "post", "put", "patch", "delete"})
 
 
 class QuickBooksSession:
+    """Manages QuickBooks API authentication and requests.
+
+    Handles OAuth 2.0 refresh token flow, automatic token refresh on 401,
+    HTTP method allowlisting, and token persistence to .env file.
+    """
+
     def __init__(self):
         # Get credentials from environment variables
         self.client_id = Environment.get("QUICKBOOKS_CLIENT_ID")
