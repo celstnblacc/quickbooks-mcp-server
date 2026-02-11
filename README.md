@@ -2,7 +2,23 @@
 
 > A secure, local-first Model Context Protocol (MCP) server to query QuickBooks data using natural language inside Claude Desktop.
 
---- 
+---
+
+## 🔀 About This Fork
+
+This fork focuses on improving test reliability and achieving 100% test pass rate. The original project had 11 failing tests in the comprehensive test suite. This fork addresses all test failures and improves test stability across:
+- Property-based/fuzz testing (hypothesis deadline issues, strategy improvements)
+- Concurrency and threading tests (race conditions, module import safety)
+- Stress testing under load (burst capacity handling, sustained rate limits)
+- Edge case handling (clock jumps, unicode, null bytes, extreme values)
+- Schema validation (file path corrections)
+- Observability and logging (debug level configuration, structured logging)
+
+All improvements are documented and ready to contribute back upstream.
+
+**Original repository:** [nikhilgy/quickbooks-mcp-server](https://github.com/nikhilgy/quickbooks-mcp-server)
+
+---
 
 ## ✅ MCP Review Certification
 
