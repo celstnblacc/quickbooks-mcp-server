@@ -270,12 +270,12 @@ class TestTestingDocumentation:
 
     def test_testing_md_exists(self):
         """TESTING.md exists."""
-        testing_path = PROJECT_ROOT / "TESTING.md"
+        testing_path = PROJECT_ROOT / "docs" / "TESTING.md"
         assert testing_path.exists()
 
     def test_testing_md_documents_pytest(self):
         """TESTING.md documents pytest usage."""
-        testing_path = PROJECT_ROOT / "TESTING.md"
+        testing_path = PROJECT_ROOT / "docs" / "TESTING.md"
         content = testing_path.read_text().lower()
 
         assert "pytest" in content
@@ -283,7 +283,7 @@ class TestTestingDocumentation:
 
     def test_pytest_commands_in_testing_md_valid(self):
         """Pytest commands in TESTING.md are valid."""
-        testing_path = PROJECT_ROOT / "TESTING.md"
+        testing_path = PROJECT_ROOT / "docs" / "TESTING.md"
         content = testing_path.read_text()
 
         # Extract pytest commands
@@ -301,7 +301,7 @@ class TestTestingDocumentation:
 
     def test_test_categories_documented(self):
         """Test categories are documented."""
-        testing_path = PROJECT_ROOT / "TESTING.md"
+        testing_path = PROJECT_ROOT / "docs" / "TESTING.md"
         content = testing_path.read_text().lower()
 
         # Should document different test types

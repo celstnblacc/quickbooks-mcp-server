@@ -316,7 +316,10 @@ class TestDataRecovery:
         schema_file = tmp_path / "quickbooks_openapi_schema.json"
         schema_file.write_text("{invalid json content")
 
-        with patch("pathlib.Path.__truediv__", return_value=schema_file):
+        # Patch the specific file open, not all path operations
+        with patch("builtins.open", side_effect=lambda p, *args, **kwargs:
+                   open(schema_file, *args, **kwargs) if "quickbooks_openapi_schema.json" in str(p)
+                   else open(p, *args, **kwargs)):
             from api_importer import load_apis
 
             with pytest.raises(Exception) as exc_info:
