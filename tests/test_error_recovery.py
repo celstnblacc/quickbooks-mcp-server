@@ -180,8 +180,9 @@ class TestRateLimitRecovery:
         # Should block
         assert limiter.is_allowed() is False
 
-        # Wait for refill (1 second = 10/60 tokens)
-        time.sleep(1.1)
+        # Wait for refill (at 10 req/min, 1 token refills every 6 seconds)
+        # Wait 6.5 seconds to ensure at least 1 token is available
+        time.sleep(6.5)
 
         # Should allow 1 request
         assert limiter.is_allowed() is True
