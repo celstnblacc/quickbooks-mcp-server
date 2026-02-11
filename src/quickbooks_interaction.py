@@ -140,7 +140,17 @@ class QuickBooksSession:
             route = "/" + route
         url = f"{self.base_url}/v3/company/{self.company_id}{route}"
 
-        response = self._send(http_method, url, params, body)
+        try:
+            response = self._send(http_method, url, params, body)
+        except requests.exceptions.RequestException as exc:
+            # Catch network errors (Timeout, ConnectionError, etc.)
+            logger.error(
+                "Network error on %s %s: %s",
+                method_lower.upper(),
+                route,
+                exc,
+            )
+            return {"error": f"Network error: {type(exc).__name__}"}
 
         if response.status_code == 200:
             return response.json()
@@ -148,7 +158,16 @@ class QuickBooksSession:
         if response.status_code == 401:
             logger.info("Access token expired — refreshing")
             self.refresh_access_token()
-            response = self._send(http_method, url, params, body)
+            try:
+                response = self._send(http_method, url, params, body)
+            except requests.exceptions.RequestException as exc:
+                logger.error(
+                    "Network error on retry %s %s: %s",
+                    method_lower.upper(),
+                    route,
+                    exc,
+                )
+                return {"error": f"Network error: {type(exc).__name__}"}
             if response.status_code == 200:
                 return response.json()
 
