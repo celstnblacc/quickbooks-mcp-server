@@ -381,23 +381,30 @@ class TestGracefulDegradation:
 
     def test_query_works_when_schema_unavailable(self):
         """Query tool works even if entity schema file is missing."""
+        import builtins
+
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {"access_token": "at", "refresh_token": "rt"}
 
+        # Only block schema JSON files — leave all other open() calls intact
+        _real_open = builtins.open
+
+        def _selective_open(path, *args, **kwargs):
+            p = str(path)
+            if "quickbooks_entity_schemas.json" in p or "quickbooks_openapi_schema.json" in p:
+                raise FileNotFoundError(f"Mocked missing: {path}")
+            return _real_open(path, *args, **kwargs)
+
         with patch("requests.post", return_value=mock_resp):
-            # Delete module cache
             for mod in list(sys.modules):
                 if "main_quickbooks_mcp" in mod:
                     del sys.modules[mod]
 
-            # Import with missing schema file
-            with patch("builtins.open", side_effect=FileNotFoundError):
+            with patch("builtins.open", side_effect=_selective_open):
                 from main_quickbooks_mcp import query_quickbooks
 
-                # get_quickbooks_entity_schema might fail, but query should work
                 result = query_quickbooks("SELECT * FROM Account")
-                # Should return error about no session, not crash
                 assert result.text
 
     def test_tools_registered_despite_partial_schema_errors(self):

@@ -312,29 +312,28 @@ class TestTestingDocumentation:
 class TestCLAUDEmd:
     """Test CLAUDE.md documentation."""
 
+    def _find_claude_md(self):
+        """Return the path to CLAUDE.md, checking root first then docs/."""
+        root_path = PROJECT_ROOT / "CLAUDE.md"
+        if root_path.exists():
+            return root_path
+        return PROJECT_ROOT / "docs" / "CLAUDE.md"
+
     def test_claude_md_exists(self):
-        """CLAUDE.md exists."""
-        claude_md_path = PROJECT_ROOT / "docs" / "CLAUDE.md"
-        assert claude_md_path.exists()
+        """CLAUDE.md exists at root or in docs/."""
+        assert self._find_claude_md().exists()
 
     def test_claude_md_has_commands(self):
         """CLAUDE.md documents key commands."""
-        claude_md_path = PROJECT_ROOT / "docs" / "CLAUDE.md"
-        content = claude_md_path.read_text().lower()
-
-        # Should document key development commands
+        content = self._find_claude_md().read_text().lower()
         assert "pytest" in content or "test" in content
         assert "uv" in content  # Package manager
 
     def test_claude_md_describes_architecture(self):
         """CLAUDE.md describes architecture."""
-        claude_md_path = PROJECT_ROOT / "docs" / "CLAUDE.md"
-        content = claude_md_path.read_text().lower()
-
-        # Should describe key components
+        content = self._find_claude_md().read_text().lower()
         assert "mcp" in content
         assert "quickbooks" in content
-        # Should mention key files
         assert "main" in content or "server" in content
 
 
