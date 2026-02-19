@@ -10,15 +10,19 @@ dependencies = [
     "python-dotenv>=1.0.1",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-cov>=4.0.0",
+    "hypothesis>=6.0.0",
+    "mutmut>=2.4.0",
+    "tox>=4.0.0",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = [
-    "api_importer",
-    "environment",
-    "filesystem",
-    "main_quickbooks_mcp",
-    "quickbooks_interaction"
-] 
+packages = ["src"] 

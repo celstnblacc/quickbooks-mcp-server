@@ -1,7 +1,54 @@
+# Environment and secrets
 *.env
+.env
+.env.*
+!env_template.txt
+
+# Python cache
 *.pyc
 *.pyo
 *.pyd
 *.pyw
 *.pyz
+__pycache__/
+*.so
 .python-version
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.hypothesis/
+
+# Mutation testing
+.mutmut-cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Logs
+*.log
+
+# Backup files
+*_OLD.md
+*.bak
+*.backup
